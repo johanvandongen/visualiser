@@ -1,5 +1,6 @@
 import React from "react";
 import './index.css'
+import {ALG} from './App';
 
 export default function SideMenu(props) {
     const menuStyle = {
@@ -18,10 +19,21 @@ export default function SideMenu(props) {
     // }
 
     return (
-        <div style={menuStyle}>
-            <button className='button' onClick={props.generateArray}>Generate array</button>
-            <button className="button" onClick={props.sortArray}>Sort!</button>
-            <button className="button" onClick={props.pause}>Pause</button>
-        </div>
+        <>
+            <div style={menuStyle}>
+                <button className='button' onClick={props.generateArray}>Generate array</button>
+                <button className="button" onClick={props.sortArray}>Sort!</button>
+                <button className="button" onClick={props.pause}>Pause</button>
+            </div>
+
+            <div>
+                <p>Current selection: ...</p>
+                <select onChange={props.switchAlg}>
+                    <option value={ALG.INSERTION}>{ALG.INSERTION}</option>
+                    <option value={ALG.BUBBLE}>{ALG.BUBBLE}</option>
+                </select>
+            </div>
+        </>
+        
     )
 }

@@ -8,7 +8,7 @@ import { randomValue } from "./helpers"
 import { InsertionSort } from "./SortingAlgs/InsertionSort";
 import { BubbleSort } from "./SortingAlgs/BubbleSort";
 
-const ALG = {
+export const ALG = {
   INSERTION: 'insertion',
   BUBBLE: 'bubble',
 }
@@ -92,6 +92,30 @@ function App() {
     })
   }
 
+  const switchSortingAlgorithm = (event) => {
+    console.log("Switched to", event.target.value)
+
+    setArray((prev) => {
+      clearInterval(array.timer)
+      return {...prev, step:0, timer:null }
+    }) 
+
+    setAlgorithm((prev) => {
+      return event.target.value
+    })
+
+    setMoves((prev) => {
+      let sorter;
+      if (alogrithm === ALG.INSERTION) {
+        sorter = new InsertionSort();
+      } else {
+        sorter = new BubbleSort();
+      }
+      return sorter.get_sort_index_steps(array.values)
+    })
+
+  }
+
   // Generate array at beginning of component
   useEffect(() => {
     generateArray()
@@ -107,7 +131,6 @@ function App() {
           sorter = new InsertionSort();
         } else {
           sorter = new BubbleSort();
-          console.log("heer")
         }
         return sorter.get_sort_index_steps(array.values)
       });
@@ -153,7 +176,7 @@ function App() {
       </div>
 
       <div style={sideMenuStyle}>
-        <SideMenu generateArray={generateArray} sortArray={runSort} pause={pauseVisualisation}/>
+        <SideMenu generateArray={generateArray} sortArray={runSort} pause={pauseVisualisation} switchAlg={switchSortingAlgorithm}/>
       </div>
     </div>
 
