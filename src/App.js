@@ -14,12 +14,10 @@ export const ALG = {
 }
 
 function App() {
-  const [array, setArray] = useState({values: [], leftElement:0, rightElement:0, step:0, timer: null})
+  const [array, setArray] = useState({initValues: [], values: [], leftElement:0, rightElement:0, step:0, timer: null})
   const [moves, setMoves] = useState([])
   const [alogrithm, setAlgorithm] = useState(ALG.INSERTION)
   const timerIdRef = useRef();
-
-  
 
   const generateArray = () => {
 
@@ -32,7 +30,7 @@ function App() {
         newArray.push( {id:uuidv4(), val: randValue} );
       }
 
-      return {...prev, values:newArray, step:0, timer:null}}) 
+      return {...prev, initValues: newArray, values:newArray, step:0, timer:null}}) 
   }
 
   const runSortAnimation = () => {
@@ -93,27 +91,14 @@ function App() {
   }
 
   const switchSortingAlgorithm = (event) => {
-    console.log("Switched to", event.target.value)
 
     setArray((prev) => {
       clearInterval(array.timer)
       return {...prev, step:0, timer:null }
     }) 
 
-    setAlgorithm((prev) => {
-      return event.target.value
-    })
-
-    setMoves((prev) => {
-      let sorter;
-      if (alogrithm === ALG.INSERTION) {
-        sorter = new InsertionSort();
-      } else {
-        sorter = new BubbleSort();
-      }
-      return sorter.get_sort_index_steps(array.values)
-    })
-
+    setAlgorithm(event.target.value);
+    console.log("Switched to", event.target.value)
   }
 
   // Generate array at beginning of component
@@ -123,19 +108,16 @@ function App() {
 
   // Set new moves
   useEffect(() => { 
-    
-    if (array.step === 0) {
-      setMoves((prev) => {
-        let sorter;
-        if (alogrithm === ALG.INSERTION) {
-          sorter = new InsertionSort();
-        } else {
-          sorter = new BubbleSort();
-        }
-        return sorter.get_sort_index_steps(array.values)
-      });
-    }
-  }, [array])
+    setMoves((prev) => {
+      let sorter;
+      if (alogrithm === ALG.INSERTION) {
+        sorter = new InsertionSort();
+      } else {
+        sorter = new BubbleSort();
+      }
+      return sorter.get_sort_index_steps(array.values)
+    });
+  }, [array.initValues, alogrithm])
 
   // Styles ---
   const topMenuStyle = {
