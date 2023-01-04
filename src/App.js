@@ -73,13 +73,13 @@ function App() {
   // Currently uses a useRef to store timer id which we clear on second call, but this seems a bit hacky
   // so this might break later on!
   // We can also use a global variable instead of useRef I think...
-  const runSort = () => {
+  const runSort = (ms) => {
 
     setArray((prev) => {
-      if (prev.timer === null) {
+      if (true) {
         
         clearInterval(timerIdRef.current)
-        const intervalTimer = setInterval(() => runSortAnimation(), 4)
+        const intervalTimer = setInterval(() => runSortAnimation(), ms)
         
         timerIdRef.current = intervalTimer;
         console.log("timer set", intervalTimer)
@@ -168,6 +168,7 @@ function App() {
       <div style={sideMenuStyle}>
         <SideMenu 
         alg={alogrithm}
+        timer={array.timer}
         generateArray={generateArray} 
         sortArray={runSort} 
         reset = {resetArray}
