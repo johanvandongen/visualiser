@@ -5,28 +5,6 @@ import './index.css'
 
 export default function Visualisation({array}) {
 
-    // const insertionSort = (array) => {
-    //     let moves = [];
-    //     for (let i=0; i < (array.length-1); i++) {
-    //         for (let j=i; j >= 0; j--){
-                
-                
-    //             if (array[j]<array[j+1]) {
-    //                 break;
-    //             }
-
-    //             moves.push({indices: [j,j+1], type: "COMPARE"})
-    //             if (array[j]>array[j+1]) {
-    //                 let temp = array[j]
-    //                 array[j] = array[j+1]
-    //                 array[j+1] = temp
-    //                 moves.push({indices: [j,j+1], type: "SWAP"})
-    //             }
-    //         }
-    //     }
-    //     return array;
-    // }
-
     const testAlgorithm = (algorithm) => {
         let numberOfTests = 1000;
         let randValue = randomValue(0,100)
@@ -79,18 +57,12 @@ export default function Visualisation({array}) {
         backgroundColor:COLORS.color4, 
         width:"1%"
     }
-    
+
+    const width = 100 / array.values.length - 0.2;
 
     return (
         <>
         <div style={containerStyle}>
-            {/* {array.map((bar, index) => {
-                let color = COLORS.color4;
-                let className = "niks";
-                if (index==5) {
-                    className = "swap";
-                }
-            return <div id={bar.id} className={className} key={bar.id} style={{height: bar.val+"%", position: 'absolute', bottom:'10px', left:'0px', width:"5px", transform: "translateX("+ index*10+ "px)",transition: 'transform 1s'}}></div>;})} */}
             {array.values.map((bar, index) => {
                 let color = COLORS.color4;
                 let className = "niks";
@@ -103,7 +75,7 @@ export default function Visualisation({array}) {
             return <div id={bar.id} className={className} key={bar.id} style={{
                 height:bar.val+"%", 
                 backgroundColor:color, 
-                width:"0.8%"}}>
+                width:width+'%'}}>
                 </div>;
             })}
         </div>

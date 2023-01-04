@@ -14,27 +14,35 @@ export const ALG = {
 }
 
 function App() {
-  const [array, setArray] = useState({values: [], leftElement:0, rightElement:0, step:0, timer: null})
+  const [array, setArray] = useState({initValues: [], values: [], leftElement:0, rightElement:0, step:0, timer: null})
   const [moves, setMoves] = useState([])
   const [alogrithm, setAlgorithm] = useState(ALG.INSERTION)
   const timerIdRef = useRef();
 
-  
-
-  const generateArray = () => {
+  // Generate a new array
+  const generateArray = (arraySize) => {
 
     setArray((prev) => {
       clearInterval(prev.timer);
       
       let newArray = []
-      for (let i =0; i<100; i++) {
+      for (let i =0; i<arraySize; i++) {
         let randValue = randomValue(1,100);
         newArray.push( {id:uuidv4(), val: randValue} );
       }
 
-      return {...prev, values:newArray, step:0, timer:null}}) 
+      return {...prev, initValues: newArray, values:newArray, step:0, timer:null}}) 
   }
 
+  // TODO after reset, set new moves
+  const resetArray = () => {
+    setArray((prev) => {
+      clearInterval(prev.timer);
+      return {...prev, values:prev.initValues, step:0, timer:null}
+    })
+  }
+
+  // Sorts one step
   const runSortAnimation = () => {
     
     setArray((prev) => {
@@ -66,13 +74,13 @@ function App() {
   // Currently uses a useRef to store timer id which we clear on second call, but this seems a bit hacky
   // so this might break later on!
   // We can also use a global variable instead of useRef I think...
-  const runSort = () => {
+  const runSort = (ms) => {
 
     setArray((prev) => {
-      if (prev.timer === null) {
+      if (true) {
         
         clearInterval(timerIdRef.current)
-        const intervalTimer = setInterval(() => runSortAnimation(), 4)
+        const intervalTimer = setInterval(() => runSortAnimation(), ms)
         
         timerIdRef.current = intervalTimer;
         console.log("timer set", intervalTimer)
@@ -82,28 +90,33 @@ function App() {
     })
   }
 
+  // Clear timer and update the state
   const pauseVisualisation = () => {
     setArray((prev) => {
-      if (prev.timer === null) {
-        return {...prev}
-      }
-      clearInterval(prev.timer)
+      clearInterval(prev.timer) // Works even if prev.timer is null
       return {...prev, timer: null}
     })
   }
 
+  // Stop the timer and set the new alg
   const switchSortingAlgorithm = (event) => {
-    console.log("Switched to", event.target.value)
 
     setArray((prev) => {
       clearInterval(array.timer)
       return {...prev, step:0, timer:null }
     }) 
 
-    setAlgorithm((prev) => {
-      return event.target.value
-    })
+    setAlgorithm(event.target.value);
+    console.log("Switched to", event.target.value)
+  }
 
+  // Generate array at beginning of component
+  useEffect(() => {
+    generateArray(100)
+  }, [])
+
+  // Set new moves
+  useEffect(() => { 
     setMoves((prev) => {
       let sorter;
       if (alogrithm === ALG.INSERTION) {
@@ -112,30 +125,8 @@ function App() {
         sorter = new BubbleSort();
       }
       return sorter.get_sort_index_steps(array.values)
-    })
-
-  }
-
-  // Generate array at beginning of component
-  useEffect(() => {
-    generateArray()
-  }, [])
-
-  // Set new moves
-  useEffect(() => { 
-    
-    if (array.step === 0) {
-      setMoves((prev) => {
-        let sorter;
-        if (alogrithm === ALG.INSERTION) {
-          sorter = new InsertionSort();
-        } else {
-          sorter = new BubbleSort();
-        }
-        return sorter.get_sort_index_steps(array.values)
-      });
-    }
-  }, [array])
+    });
+  }, [array.initValues, alogrithm])
 
   // Styles ---
   const topMenuStyle = {
@@ -166,7 +157,7 @@ function App() {
     <>
     
     <div style={topMenuStyle}>
-      <Menu generateArray={generateArray} sortArray={runSort}/>
+      <Menu/>
     </div>
 
     <div style={{display:"flex"}}>
@@ -176,7 +167,14 @@ function App() {
       </div>
 
       <div style={sideMenuStyle}>
-        <SideMenu generateArray={generateArray} sortArray={runSort} pause={pauseVisualisation} switchAlg={switchSortingAlgorithm}/>
+        <SideMenu 
+        alg={alogrithm}
+        timer={array.timer}
+        generateArray={generateArray} 
+        sortArray={runSort} 
+        reset = {resetArray}
+        pause={pauseVisualisation} 
+        switchAlg={switchSortingAlgorithm}/>
       </div>
     </div>
 
