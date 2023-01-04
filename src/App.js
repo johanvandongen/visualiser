@@ -34,6 +34,7 @@ function App() {
       return {...prev, initValues: newArray, values:newArray, step:0, timer:null}}) 
   }
 
+  // TODO after reset, set new moves
   const resetArray = () => {
     setArray((prev) => {
       clearInterval(prev.timer);
