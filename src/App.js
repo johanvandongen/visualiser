@@ -7,10 +7,12 @@ import { COLORS } from "./colors";
 import { randomValue } from "./helpers"
 import { InsertionSort } from "./SortingAlgs/InsertionSort";
 import { BubbleSort } from "./SortingAlgs/BubbleSort";
+import { InPlaceMergeSort } from "./SortingAlgs/InPlaceMergeSort";
 
 export const ALG = {
   INSERTION: 'insertion',
   BUBBLE: 'bubble',
+  MERGE: 'merge'
 }
 
 function App() {
@@ -121,8 +123,10 @@ function App() {
       let sorter;
       if (alogrithm === ALG.INSERTION) {
         sorter = new InsertionSort();
-      } else {
+      } else if (alogrithm === ALG.BUBBLE) {
         sorter = new BubbleSort();
+      } else {
+        sorter = new InPlaceMergeSort();
       }
       return sorter.get_sort_index_steps(array.values)
     });

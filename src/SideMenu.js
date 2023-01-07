@@ -78,6 +78,7 @@ export default function SideMenu(props) {
                 <select onChange={props.switchAlg}>
                     <option value={ALG.INSERTION}>{ALG.INSERTION}</option>
                     <option value={ALG.BUBBLE}>{ALG.BUBBLE}</option>
+                    <option value={ALG.MERGE}>{ALG.MERGE}</option>
                 </select>
             </div>
         </>
