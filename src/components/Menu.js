@@ -1,7 +1,8 @@
 import React from "react";
-import { COLORS } from "./colors"
+import { COLORS } from "../colors"
+import '../index.css'
 
-export default function Menu() {
+export default function Menu(props) {
 
     const menuStyle = {
         position: "relative", 
@@ -16,6 +17,13 @@ export default function Menu() {
     return (
         <div style={menuStyle}>
             <h1>Sorting Visualiser</h1>
+
+            <div id="custom-select">
+                <select onChange={props.changeType}>
+                    <option value={0}>Sorter</option>
+                    <option value={1}>Konva</option>
+                </select>
+            </div>
         </div>
     )
 }

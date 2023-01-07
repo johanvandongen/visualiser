@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-import './index.css'
-import {ALG} from './App';
+import '../index.css'
+import {ALG} from './SorterVisualisation';
 
 export default function SideMenu(props) {
     const [size, setSize] = useState(50)
