@@ -4,8 +4,8 @@ import './index.css'
 import {ALG} from './App';
 
 export default function SideMenu(props) {
-    const [size, setSize] = useState(100)
-    const [speed, setSpeed] = useState({percentage: 100, absolute: 4})
+    const [size, setSize] = useState(50)
+    const [speed, setSpeed] = useState({percentage: 80, milliSeconds: 203}) // Absolute hard coded (can also use useEffect for init)
 
     const rowStyle = {
         position: "relative", 
@@ -28,26 +28,27 @@ export default function SideMenu(props) {
         setSize(event.target.value)
     }
 
-    // map 1- 100
+    // map 1%- 100%
     // to 1000ms - 4ms
     const handleSpeedSlider = (event) => {
         const value = event.target.value
-        const range = 1000-4
-        const new_speed = Math.round(1000 - range * (value /100))
-        setSpeed({percentage: value, absolute: new_speed})
+        const range = 1000 - 4
+        const new_speed = Math.round(1000 - (range * (value / 100)))
+        setSpeed({percentage: value, milliSeconds: new_speed})
     }
 
+    // Play / Pause button
     const playPause = () => {
         if (props.timer !== null) {
             props.pause();
         } else {
-            props.sortArray(speed.absolute)
+            props.sortArray(speed.milliSeconds)
         }
     }
 
     useEffect(() => {
         if (props.timer !== null) {
-            props.sortArray(speed.absolute)
+            props.sortArray(speed.milliSeconds)
         }
     }, [speed])
 
@@ -65,7 +66,6 @@ export default function SideMenu(props) {
 
             <div style={rowStyle}>
                 <button className="button" onClick={playPause}>{props.timer ? 'Pause' : 'Play!'}</button>
-                {/* <button className="button" onClick={props.pause}>Pause</button> */}
             </div>
 
             <div style={columnStyle}>
@@ -74,10 +74,11 @@ export default function SideMenu(props) {
             </div>
 
             <div style={columnStyle}>
-                <p>Current selection: {props.alg}</p>
+                <p>Current selection: <span>{props.alg}</span></p>
                 <select onChange={props.switchAlg}>
                     <option value={ALG.INSERTION}>{ALG.INSERTION}</option>
                     <option value={ALG.BUBBLE}>{ALG.BUBBLE}</option>
+                    <option value={ALG.MERGE}>{ALG.MERGE}</option>
                 </select>
             </div>
         </>

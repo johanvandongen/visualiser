@@ -7,14 +7,16 @@ import { COLORS } from "./colors";
 import { randomValue } from "./helpers"
 import { InsertionSort } from "./SortingAlgs/InsertionSort";
 import { BubbleSort } from "./SortingAlgs/BubbleSort";
+import { InPlaceMergeSort } from "./SortingAlgs/InPlaceMergeSort";
 
 export const ALG = {
   INSERTION: 'insertion',
   BUBBLE: 'bubble',
+  MERGE: 'merge'
 }
 
 function App() {
-  const [array, setArray] = useState({initValues: [], values: [], leftElement:0, rightElement:0, step:0, timer: null})
+  const [array, setArray] = useState({initValues: [], values: [], leftElement:-1, rightElement:-1, step:0, timer: null})
   const [moves, setMoves] = useState([])
   const [alogrithm, setAlgorithm] = useState(ALG.INSERTION)
   const timerIdRef = useRef();
@@ -38,7 +40,21 @@ function App() {
   const resetArray = () => {
     setArray((prev) => {
       clearInterval(prev.timer);
-      return {...prev, values:prev.initValues, step:0, timer:null}
+
+      // This is kinda hacky, but instead of just setting the values to initValues
+      // we copy the initValues array with new id's. This way the initValues gets 'changed' (cuz of id)
+      // and thus the useEffect for generating the new steps gets triggerd (which is why we do this).
+      // As a positive side effect the bars fade in again because of the id change.
+      let newArray = []
+      for (let i =0; i<prev.initValues.length; i++) {
+        if (prev.values[i].val !== prev.initValues[i].val) {
+          newArray.push( {id:uuidv4(), val: prev.initValues[i].val} );
+        } else {
+          newArray.push( {id: prev.initValues[i].id, val: prev.initValues[i].val} );
+        }
+      }
+
+      return {...prev, initValues: newArray, values:newArray, step:0, timer:null}
     })
   }
 
@@ -77,16 +93,12 @@ function App() {
   const runSort = (ms) => {
 
     setArray((prev) => {
-      if (true) {
-        
-        clearInterval(timerIdRef.current)
-        const intervalTimer = setInterval(() => runSortAnimation(), ms)
-        
-        timerIdRef.current = intervalTimer;
-        console.log("timer set", intervalTimer)
-        return {...prev, timer: intervalTimer}
-      }
-      return {...prev}
+      clearInterval(timerIdRef.current)
+      const intervalTimer = setInterval(() => runSortAnimation(), ms)
+      
+      timerIdRef.current = intervalTimer;
+      console.log("timer set", intervalTimer)
+      return {...prev, timer: intervalTimer}
     })
   }
 
@@ -112,7 +124,7 @@ function App() {
 
   // Generate array at beginning of component
   useEffect(() => {
-    generateArray(100)
+    generateArray(50)
   }, [])
 
   // Set new moves
@@ -121,8 +133,10 @@ function App() {
       let sorter;
       if (alogrithm === ALG.INSERTION) {
         sorter = new InsertionSort();
-      } else {
+      } else if (alogrithm === ALG.BUBBLE) {
         sorter = new BubbleSort();
+      } else {
+        sorter = new InPlaceMergeSort();
       }
       return sorter.get_sort_index_steps(array.values)
     });
