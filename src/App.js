@@ -3,6 +3,7 @@ import Menu from "./components/Menu";
 import { COLORS } from "./colors";
 import SorterVisualisation from "./components/SorterVisualisation"
 import GraphVisualisation from "./components/GraphVisualisation"
+import HelloWorld from "./components/HelloWorld"
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
   const components = {
     0: <SorterVisualisation/>,
     1: <GraphVisualisation/>,
+    2: <HelloWorld/>,
   }
 
   const changeType = (event) => {

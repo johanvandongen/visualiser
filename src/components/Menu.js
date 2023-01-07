@@ -22,6 +22,7 @@ export default function Menu(props) {
                 <select onChange={props.changeType}>
                     <option value={0}>Sorter</option>
                     <option value={1}>Konva</option>
+                    <option value={2}>Hello World!</option>
                 </select>
             </div>
         </div>
