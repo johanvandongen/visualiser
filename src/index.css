@@ -21,11 +21,8 @@ code {
     monospace;
 }
 
-.niks {
+.fade {
   animation: 2s fade-in;
-}
-.swap {
-  animation: 1s mymove;
 }
 
 @keyframes fade-in {
