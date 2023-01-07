@@ -16,7 +16,6 @@ export class InPlaceMergeSort extends SortingAlgorithm {
     
     // Function for swapping
     swap(nums,i,j) {
-        console.log("here")
         let temp = nums[i].val;
         nums[i].val = nums[j].val;
         nums[j].val = temp;

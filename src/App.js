@@ -40,7 +40,21 @@ function App() {
   const resetArray = () => {
     setArray((prev) => {
       clearInterval(prev.timer);
-      return {...prev, values:prev.initValues, step:0, timer:null}
+
+      // This is kinda hacky, but instead of just setting the values to initValues
+      // we copy the initValues array with new id's. This way the initValues gets 'changed' (cuz of id)
+      // and thus the useEffect for generating the new steps gets triggerd (which is why we do this).
+      // As a positive side effect the bars fade in again because of the id change.
+      let newArray = []
+      for (let i =0; i<prev.initValues.length; i++) {
+        if (prev.values[i].val !== prev.initValues[i].val) {
+          newArray.push( {id:uuidv4(), val: prev.initValues[i].val} );
+        } else {
+          newArray.push( {id: prev.initValues[i].id, val: prev.initValues[i].val} );
+        }
+      }
+
+      return {...prev, initValues: newArray, values:newArray, step:0, timer:null}
     })
   }
 
