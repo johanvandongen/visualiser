@@ -45,3 +45,8 @@ code {
   background-color: #cfd4e2;
   transition: 0.5s;
 }
+
+span {
+  font-weight: bold;
+  color: #993955;
+}

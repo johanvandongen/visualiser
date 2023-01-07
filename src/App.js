@@ -16,7 +16,7 @@ export const ALG = {
 }
 
 function App() {
-  const [array, setArray] = useState({initValues: [], values: [], leftElement:0, rightElement:0, step:0, timer: null})
+  const [array, setArray] = useState({initValues: [], values: [], leftElement:-1, rightElement:-1, step:0, timer: null})
   const [moves, setMoves] = useState([])
   const [alogrithm, setAlgorithm] = useState(ALG.INSERTION)
   const timerIdRef = useRef();
@@ -79,16 +79,12 @@ function App() {
   const runSort = (ms) => {
 
     setArray((prev) => {
-      if (true) {
-        
-        clearInterval(timerIdRef.current)
-        const intervalTimer = setInterval(() => runSortAnimation(), ms)
-        
-        timerIdRef.current = intervalTimer;
-        console.log("timer set", intervalTimer)
-        return {...prev, timer: intervalTimer}
-      }
-      return {...prev}
+      clearInterval(timerIdRef.current)
+      const intervalTimer = setInterval(() => runSortAnimation(), ms)
+      
+      timerIdRef.current = intervalTimer;
+      console.log("timer set", intervalTimer)
+      return {...prev, timer: intervalTimer}
     })
   }
 
@@ -114,7 +110,7 @@ function App() {
 
   // Generate array at beginning of component
   useEffect(() => {
-    generateArray(100)
+    generateArray(50)
   }, [])
 
   // Set new moves
