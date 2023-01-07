@@ -65,7 +65,6 @@ export default function SideMenu(props) {
 
             <div style={rowStyle}>
                 <button className="button" onClick={playPause}>{props.timer ? 'Pause' : 'Play!'}</button>
-                {/* <button className="button" onClick={props.pause}>Pause</button> */}
             </div>
 
             <div style={columnStyle}>

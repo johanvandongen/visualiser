@@ -25,10 +25,10 @@ export default function Visualisation({array}) {
                 let className = "fade";
 
                 if (array.leftElement === index) {
-                    color = "red";
+                    color = COLORS.visHighlight1;
                 }
                 if (array.rightElement === index) {
-                    color = "green";
+                    color = COLORS.visHighlight2;
                 }
 
                 return <div id={bar.id} className={className} key={bar.id} 
