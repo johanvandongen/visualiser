@@ -7,6 +7,7 @@ import { randomValue } from "../helpers"
 import { InsertionSort } from "../SortingAlgs/InsertionSort";
 import { BubbleSort } from "../SortingAlgs/BubbleSort";
 import { InPlaceMergeSort } from "../SortingAlgs/InPlaceMergeSort";
+import { visStyle, sideMenuStyle } from "../App";
 
 export const ALG = {
     INSERTION: 'insertion',
@@ -140,22 +141,6 @@ export default function SorterVisualisation() {
         return sorter.get_sort_index_steps(array.values)
         });
     }, [array.initValues, alogrithm])
-
-    const sideMenuStyle = {
-        height:"70vh", 
-        width:"20%", 
-        backgroundColor: COLORS.color3,
-        position:"relative",
-        padding:"1rem 1rem"
-    }
-
-    const visStyle = {
-        width:"80%", 
-        height: "70vh",
-        backgroundColor: COLORS.menuColor,
-        position:"relative",
-        padding:"1rem 1rem",
-    }
 
     return (
     <>
