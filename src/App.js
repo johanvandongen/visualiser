@@ -5,6 +5,22 @@ import SorterVisualisation from "./components/SorterVisualisation"
 import GraphVisualisation from "./components/GraphVisualisation"
 import HelloWorld from "./components/HelloWorld"
 
+export const sideMenuStyle = {
+  height:"70vh", 
+  width:"20%", 
+  backgroundColor: COLORS.color3,
+  position:"relative",
+  padding:"1rem 1rem"
+}
+
+export const visStyle = {
+  width:"80%", 
+  height: "70vh",
+  backgroundColor: COLORS.menuColor,
+  position:"relative",
+  padding:"1rem 1rem",
+}
+
 function App() {
 
   const [type, setType] = useState(0);
@@ -16,7 +32,8 @@ function App() {
     backgroundColor: COLORS.color2,
     position:"relative", 
     padding:"1rem 1rem"
-  }
+  } 
+
   const components = {
     0: <SorterVisualisation/>,
     1: <GraphVisualisation/>,
