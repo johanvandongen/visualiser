@@ -16,13 +16,15 @@ export default function Menu(props) {
 
     return (
         <div style={menuStyle}>
-            <h1>Sorting Visualiser</h1>
+            <div style={{width: "40%"}}>
+                <h1>{props.types[props.currentType].name} Visualiser</h1>
+            </div>
 
             <div id="custom-select">
-                <select onChange={props.changeType}>
-                    <option value={0}>Sorter</option>
-                    <option value={1}>Konva</option>
-                    <option value={2}>Hello World!</option>
+                <select onChange={props.changeType} value={props.currentType}>
+                    <option value={0}>{props.types[0].name}</option>
+                    <option value={1}>{props.types[1].name}</option>
+                    <option value={2}>{props.types[2].name}</option>
                 </select>
             </div>
         </div>

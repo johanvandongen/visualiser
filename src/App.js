@@ -32,12 +32,12 @@ function App() {
     backgroundColor: COLORS.color2,
     position:"relative", 
     padding:"1rem 1rem"
-  } 
+  }
 
-  const components = {
-    0: <SorterVisualisation/>,
-    1: <GraphVisualisation/>,
-    2: <HelloWorld/>,
+  const types = {
+    0: {name: "Sorter", comp: <SorterVisualisation/>},
+    1: {name: "Network Graph", comp: <GraphVisualisation/>},
+    2: {name: "Hello world", comp: <HelloWorld/>}
   }
 
   const changeType = (event) => {
@@ -49,9 +49,9 @@ function App() {
     <>
     
     <div style={topMenuStyle}>
-      <Menu changeType={changeType}/>
+      <Menu changeType={changeType} types={types} currentType={type}/>
     </div>
-    {components[type]}
+    {types[type].comp}
     </>
   )
 }
