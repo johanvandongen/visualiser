@@ -23,7 +23,7 @@ export const visStyle = {
 
 function App() {
 
-  const [type, setType] = useState(0);
+  const [type, setType] = useState(1);
 
   // Styles ---
   const topMenuStyle = {
