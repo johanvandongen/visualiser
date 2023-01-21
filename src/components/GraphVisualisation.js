@@ -17,11 +17,11 @@ function generateShapes(width, height) {
 
 // Generate new graph. This function should indicate the edges and node positions
 // id, dragable, color will be handled by the graphArea component.
-function generateGraphMatrix() {
+function generateGraphMatrix(type) {
   
   let nodesPositions;
   let matrixx;
-  if (true) {
+  if (type===1) {
     
     nodesPositions = [
       {x:10, y:15}, // 1
@@ -62,16 +62,6 @@ function generateGraphMatrix() {
   return [matrixx, nodesPositions]
 }
 
-function generateGraph(width, height) {
-  let nodes = [
-    {id: "1", x: 200, y: 10, isDragging: false}, 
-    {id: "2", x: 100, y: 100, isDragging: false}
-  ]
-  let lines = [{id: 3, x1:10, y1: 10, x2:100, y2:100, isDragging: false, directed: false}]
-
-  return [nodes, lines]
-}
-
 export default function GraphVisualisation() {
   console.log("graphVis rerendered")
   
@@ -80,8 +70,6 @@ export default function GraphVisualisation() {
   const demoRef = useRef();
   
   const [matrix, setMatrix] = useState({matrixx: [], nodesPositions: []})
-
-  
 
   // Handles canvas size to fit in the parent div
   useEffect(() => {
@@ -96,11 +84,9 @@ export default function GraphVisualisation() {
   }, [demoRef]);
 
   useEffect(() => {
-    // setStars(generateGraph(width, height)[0])
     setMatrix((prev) => {
-      let newM = generateGraphMatrix();
+      let newM = generateGraphMatrix(1);
       return {...prev, matrixx: newM[0], nodesPositions: newM[1]}
-      // new = generateGraphMatrix();
     })
   }, [width, height])
 
