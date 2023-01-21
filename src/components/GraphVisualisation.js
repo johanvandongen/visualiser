@@ -1,26 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Stage, Layer } from 'react-konva';
 import {COLORS} from '../colors.js'
 import GraphArea from "./GraphArea"
 import SideMenuGraph from "./SideMenuGraph.js";
 import { visStyle, sideMenuStyle } from "../App.js";
 
-function generateShapes(width, height) {
-  return [...Array(10)].map((_, i) => ({
-    id: i.toString(),
-    x: Math.random() * width,
-    y: Math.random() * height,
-    rotation: Math.random() * 180,
-    isDragging: false,
-  }));
-}
-
 // Generate new graph. This function should indicate the edges and node positions
 // id, dragable, color will be handled by the graphArea component.
+// For now it is hard coded. Randomizer in the future would be better
 function generateGraphMatrix(type) {
   
   let nodesPositions;
-  let matrixx;
+  let adjMatrix;
   if (type===1) {
     
     nodesPositions = [
@@ -37,7 +27,7 @@ function generateGraphMatrix(type) {
       {x:90, y:15}, // 11
       {x:10, y:95}, // 11
     ]
-    matrixx = [
+    adjMatrix = [
       [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1],
       [1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
@@ -53,13 +43,13 @@ function generateGraphMatrix(type) {
     ];
 
   } else {
-    nodesPositions = [{x:10, y:50}, {x:100, y:100}, {x:200, y:200}]
-    matrixx = [
+    nodesPositions = [{x:10, y:50}, {x:50, y:50}, {x:20, y:70}]
+    adjMatrix = [
       [0, 1, 1], 
       [1, 0, 0], 
       [1, 0, 0]];
   }
-  return [matrixx, nodesPositions]
+  return [adjMatrix, nodesPositions]
 }
 
 export default function GraphVisualisation() {
@@ -69,7 +59,7 @@ export default function GraphVisualisation() {
   const [height, setHeight] = useState(100);
   const demoRef = useRef();
   
-  const [matrix, setMatrix] = useState({matrixx: [], nodesPositions: []})
+  const [network, setNetwork] = useState({adjMatrix: [], nodesPositions: []})
 
   // Handles canvas size to fit in the parent div
   useEffect(() => {
@@ -83,10 +73,11 @@ export default function GraphVisualisation() {
     }
   }, [demoRef]);
 
+  // Generate network graph
   useEffect(() => {
-    setMatrix((prev) => {
+    setNetwork((prev) => {
       let newM = generateGraphMatrix(1);
-      return {...prev, matrixx: newM[0], nodesPositions: newM[1]}
+      return {...prev, adjMatrix: newM[0], nodesPositions: newM[1]}
     })
   }, [width, height])
 
@@ -94,7 +85,7 @@ export default function GraphVisualisation() {
     <div style={{display: "flex"}}>
       
       <div ref={demoRef} style={visStyle}>
-        <GraphArea width={width} height={height} matrix={matrix}/>
+        <GraphArea width={width} height={height} network={network}/>
       </div>
       
       <div style={sideMenuStyle}>

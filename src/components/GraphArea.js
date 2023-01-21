@@ -2,25 +2,24 @@ import React, { useEffect, useRef, useState } from "react";
 import { Stage, Layer, Text, Circle } from 'react-konva';
 import Edge from './Edge'
 
-
-
 export default function GraphVisualisation(props) {
   // console.log("area rerendered")
 
   const [nodes, setNodes] = useState([])
   const [edges, setEdges] = useState([])
+  const [nodeSize, setNodeSize] = useState(30)
 
+  // When nodes get dragged update their position in react state 
+  // (needed to update edge positions)
   const handleDrag = (e) => {
     const id =e.target.id()
     const pos = e.target.position()
-    // console.log("pos handle", pos, id)
     setNodes((prev) => {
       if (prev != null && prev.length > 0) {
         let nodesCopy = JSON.parse(JSON.stringify(prev))
         for (let i = 0; i< nodesCopy.length; i++) {
           
           if (nodesCopy[i].id === id) {
-            // console.log("id mathced", id)
             nodesCopy[i] = {...nodesCopy[i], ...pos}
           }
         }
@@ -31,51 +30,68 @@ export default function GraphVisualisation(props) {
     })
   }
 
+  // Load in graph network from props
   useEffect(() =>{
-    console.log("joo")
     setNodes((prev) => {
-      
-      if (props.matrix.nodesPositions != null) {
-        return props.matrix.nodesPositions.map((node, index) => ({...node, isDragging: false, id: "node"+index}))
+      if (props.network.nodesPositions != null) {
+        return props.network.nodesPositions.map((node, index) => (
+          {...node, 
+            isDragging: false, 
+            id: "node" + index,
+            x: node.x / 100 * props.width, // Scale to fit whole canvas
+            y: node.y / 100 * props.height,
+          }))
       } else {
         return []
       }
     })
   }, [props])
 
-  // Loop over right triangle in matrix
+  // Loop over right triangle in adjacency matrix
   useEffect(() => {
     setEdges(() => {
-      console.log("edge changed")
       let edges = []
-      for (let i=0; i < props.matrix.matrixx.length; i++) {
-        for (let j=i; j < props.matrix.matrixx[i].length; j++) {
-          if (nodes != null && nodes.length > 0 && props.matrix.matrixx[i][j] === 1 && i !== j){
+      
+      for (let i=0; i < props.network.adjMatrix.length; i++) {
+        for (let j=i; j < props.network.adjMatrix[i].length; j++) {
+          if (props.network.adjMatrix[i][j] === 1 && i !== j) {
             let uniqueEdgeKey = "from" + i + "to" + j
-            edges.push( 
-              <Edge key={uniqueEdgeKey} id={uniqueEdgeKey} node1={nodes[i]} node2={nodes[j]}/>
+
+            edges.push(
+              {
+                id: uniqueEdgeKey,
+                node1: i,
+                node2: j
+              }
             )
           }
         }
       }
+      
       return edges;
-    }  
-    )
-
-  }, [props, nodes])
+    })
+  }, [props])
 
     return (
         <Stage width={props.width} height={props.height}>
           <Layer>
-            {edges}
+            
+            {edges.map((edge) => (
+              <Edge
+              key={edge.id} 
+              id={edge.id} 
+              node1={nodes[edge.node1]} 
+              node2={nodes[edge.node2]}
+              />
+            ))}
+
             {nodes.map((node) => (
               <Circle
                 key={node.id}
                 id={node.id}
                 x={node.x}
                 y={node.y}
-                radius={10}
-                // stroke="black"
+                radius={nodeSize}
                 fill="white"
                 draggable
                 shadowBlur={10}
