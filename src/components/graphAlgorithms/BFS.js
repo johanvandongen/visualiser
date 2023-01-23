@@ -1,17 +1,8 @@
+import { GraphAlgorithm } from "./GraphAlgorithm"
 
-export class BFS {
-
-    get_neighbours(node, matrix) {
-        let result = []
-        for (let i=0; i < matrix[node].length; i++) {
-            if (matrix[node][i] !== 0) {
-                result.push(i)
-            }
-        }
-        return result
-    }
+export class BFS extends GraphAlgorithm {
     
-    get_BFS_steps(start, end, adjMatrix) {
+    get_graph_steps(start, end, adjMatrix) {
 
         if (adjMatrix === null || adjMatrix.length === 0) {
             return []
@@ -24,7 +15,6 @@ export class BFS {
     
         while (q.length > 0) {
     
-            // let node = q[0];
             let node = q.shift(0)
             steps.push({visited: JSON.parse(JSON.stringify(visited)), current: node})
     

@@ -4,6 +4,7 @@ import GraphArea from "./GraphArea"
 import SideMenuGraph from "./SideMenuGraph.js";
 import { visStyle, sideMenuStyle } from "../App.js";
 import { BFS } from './graphAlgorithms/BFS'
+import { DFS } from './graphAlgorithms/DFS'
 
 // Generate new graph. This function should indicate the edges and node positions
 // id, dragable, color will be handled by the graphArea component.
@@ -109,11 +110,13 @@ const runSort = (ms) => {
 // Set new moves
 useEffect(() => { 
   setMoves((prev) => {
-  let sorter;
+  let traverser;
   if (alogrithm === ALG.BFS) {
-      sorter = new BFS();
+    traverser = new BFS();
+  } else if (alogrithm === ALG.DFS) {
+    traverser = new DFS();
   }
-  return sorter.get_BFS_steps(0,1, network.adjMatrix)
+  return traverser.get_graph_steps(0,1, network.adjMatrix)
   });
 }, [network.initNodesPositions, alogrithm])
 
