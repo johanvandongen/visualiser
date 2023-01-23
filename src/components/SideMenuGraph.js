@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 
-export default function SideMenuGraph() {
+export default function SideMenuGraph(props) {
 
 
   return (
     <>
-      <button className="button" onClick={console.log('e')}>test</button>
+      <button className="button" onClick={() => {props.play(500)}}>test</button>
     </>
   );
 
