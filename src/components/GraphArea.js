@@ -92,7 +92,8 @@ export default function GraphVisualisation(props) {
                 x={node.x}
                 y={node.y}
                 radius={nodeSize}
-                fill="white"
+                // fill="white"
+                fill={node.color}
                 draggable
                 shadowBlur={10}
                 shadowOpacity={0.6}
