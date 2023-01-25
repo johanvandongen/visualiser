@@ -173,8 +173,11 @@ useEffect(() => {
   // Generate network graph
   useEffect(() => {
     setNetwork((prev) => {
-      let newM = generateGraphMatrix();
-      return {...prev, adjMatrix: newM[0], initNodesPositions: newM[1],  nodesPositions: newM[1]}
+      if (prev.initNodesPositions === null || prev.initNodesPositions.length === 0) {
+        let newM = generateGraphMatrix();
+        return {...prev, adjMatrix: newM[0], initNodesPositions: newM[1],  nodesPositions: newM[1]}
+      }
+      return prev
     })
   }, [width, height])
 
