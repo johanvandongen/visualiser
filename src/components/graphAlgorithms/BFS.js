@@ -26,7 +26,7 @@ export class BFS extends GraphAlgorithm {
                 }
             }
         }
-        console.log("BFS moves", steps)
+        
         return steps
     }
 }

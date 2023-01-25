@@ -4,12 +4,15 @@ import GraphArea from "./GraphArea"
 import { visStyle, sideMenuStyle } from "../App.js";
 import { BFS } from './graphAlgorithms/BFS'
 import { DFS } from './graphAlgorithms/DFS'
+import { randomValue } from '../helpers.js'
 import {SideMenuGeneric, PlayPause, AlgSelection, GraphGenButtons} from "../index.js"
 
 // Generate new graph. This function should indicate the edges and node positions
 // id, dragable, color will be handled by the graphArea component.
 // For now it is hard coded. Randomizer in the future would be better
-function generateGraphMatrix(type) {
+function generateGraphMatrix() {
+
+  let type = 1//randomValue(1,2)
   
   let nodesPositions;
   let adjMatrix;
@@ -60,7 +63,6 @@ export const ALG = {
 }
 
 export default function GraphVisualisation() {
-  console.log("graphVis rerendered")
   
   const [width, setWidth] = useState(100);
   const [height, setHeight] = useState(100);
@@ -72,7 +74,7 @@ export default function GraphVisualisation() {
   const timerIdRef = useRef();
 
   // Sorts one step
-  const runSortAnimation = () => {
+  const runAnimation = () => {
         
     setNetwork((prev) => {
 
@@ -99,12 +101,20 @@ const runSort = (ms) => {
 
     setNetwork((prev) => {
     clearInterval(timerIdRef.current)
-    const intervalTimer = setInterval(() => runSortAnimation(), ms)
+    const intervalTimer = setInterval(() => runAnimation(), ms)
     
     timerIdRef.current = intervalTimer;
     console.log("timer set", intervalTimer)
     return {...prev, timer: intervalTimer}
     })
+}
+
+// Clear timer and update the state
+const pauseVisualisation = () => {
+  setNetwork((prev) => {
+  clearInterval(prev.timer) // Works even if prev.timer is null
+  return {...prev, timer: null}
+  })
 }
 
 const switchAlgorithm = (event) => {
@@ -127,7 +137,6 @@ useEffect(() => {
   } else if (alogrithm === ALG.DFS) {
     traverser = new DFS();
   }
-  console.log("alg", alogrithm)
   return traverser.get_graph_steps(0,1, network.adjMatrix)
   });
 }, [network.initNodesPositions, alogrithm])
@@ -145,10 +154,26 @@ useEffect(() => {
     }
   }, [demoRef]);
 
+  const generateGraph = () => {
+    setNetwork((prev) => {
+      let newM = generateGraphMatrix();
+      return {...prev, adjMatrix: newM[0], initNodesPositions: newM[1],  nodesPositions: newM[1]}
+    })
+  }
+
+  // When the nodepositions are reset, no new moves are generated. But the old moves are still
+  // correct and we set the step to 0 so that it start correctly again
+  const resetNetwork = () => {
+    setNetwork((prev) => {
+    clearInterval(prev.timer);
+    return {...prev, nodesPositions: prev.initNodesPositions, step:0, timer:null}
+    })
+}
+
   // Generate network graph
   useEffect(() => {
     setNetwork((prev) => {
-      let newM = generateGraphMatrix(1);
+      let newM = generateGraphMatrix();
       return {...prev, adjMatrix: newM[0], initNodesPositions: newM[1],  nodesPositions: newM[1]}
     })
   }, [width, height])
@@ -162,8 +187,8 @@ useEffect(() => {
       
       <div style={sideMenuStyle}>
         <SideMenuGeneric>
-          <GraphGenButtons generate={generateGraphMatrix} reset={() => console.log("e")}/>
-          <PlayPause timer={network.timer} sortArray={runSort} pause={() => console.log("e")}/>
+          <GraphGenButtons generate={generateGraph} reset={resetNetwork}/>
+          <PlayPause timer={network.timer} sortArray={runSort} pause={pauseVisualisation}/>
           <AlgSelection algs={ALG} alg={alogrithm} switchAlg={switchAlgorithm}/>
         </SideMenuGeneric>
       </div>
