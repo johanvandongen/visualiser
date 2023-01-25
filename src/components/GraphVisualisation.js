@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import {COLORS} from '../colors.js'
 import GraphArea from "./GraphArea"
-import SideMenuGraph from "./SideMenuGraph.js";
 import { visStyle, sideMenuStyle } from "../App.js";
 import { BFS } from './graphAlgorithms/BFS'
 import { DFS } from './graphAlgorithms/DFS'
+import {SideMenuGeneric, PlayPause, AlgSelection, GraphGenButtons} from "../index.js"
 
 // Generate new graph. This function should indicate the edges and node positions
 // id, dragable, color will be handled by the graphArea component.
@@ -107,6 +107,17 @@ const runSort = (ms) => {
     })
 }
 
+const switchAlgorithm = (event) => {
+
+  setNetwork((prev) => {
+  clearInterval(network.timer)
+  return {...prev, step:0, timer:null }
+  }) 
+
+  setAlgorithm(event.target.value);
+  console.log("Switched to", event.target.value)
+}
+
 // Set new moves
 useEffect(() => { 
   setMoves((prev) => {
@@ -116,6 +127,7 @@ useEffect(() => {
   } else if (alogrithm === ALG.DFS) {
     traverser = new DFS();
   }
+  console.log("alg", alogrithm)
   return traverser.get_graph_steps(0,1, network.adjMatrix)
   });
 }, [network.initNodesPositions, alogrithm])
@@ -149,7 +161,11 @@ useEffect(() => {
       </div>
       
       <div style={sideMenuStyle}>
-        <SideMenuGraph play={runSort}/>
+        <SideMenuGeneric>
+          <GraphGenButtons generate={generateGraphMatrix} reset={() => console.log("e")}/>
+          <PlayPause timer={network.timer} sortArray={runSort} pause={() => console.log("e")}/>
+          <AlgSelection algs={ALG} alg={alogrithm} switchAlg={switchAlgorithm}/>
+        </SideMenuGeneric>
       </div>
     </div>
   );
