@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 
-export default function GraphVisualisation() {
+export default function HelloWorld() {
 
     return (
         <>

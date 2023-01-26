@@ -4,9 +4,9 @@ import SideMenu from "./SideMenu"
 import { v4 as uuidv4 } from 'uuid';
 import { COLORS } from "../colors";
 import { randomValue } from "../helpers"
-import { InsertionSort } from "../SortingAlgs/InsertionSort";
-import { BubbleSort } from "../SortingAlgs/BubbleSort";
-import { InPlaceMergeSort } from "../SortingAlgs/InPlaceMergeSort";
+import { InsertionSort } from "../sortingAlgs/InsertionSort";
+import { BubbleSort } from "../sortingAlgs/BubbleSort";
+import { InPlaceMergeSort } from "../sortingAlgs/InPlaceMergeSort";
 import { visStyle, sideMenuStyle } from "../App";
 
 export const ALG = {

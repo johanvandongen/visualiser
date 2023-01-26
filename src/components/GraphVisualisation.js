@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import {COLORS} from '../colors.js'
 import GraphArea from "./GraphArea"
 import { visStyle, sideMenuStyle } from "../App.js";
-import { BFS } from './graphAlgorithms/BFS'
-import { DFS } from './graphAlgorithms/DFS'
+import { BFS } from '../graphAlgs/BFS'
+import { DFS } from '../graphAlgs/DFS'
 import { randomValue } from '../helpers.js'
 import {SideMenuGeneric, PlayPause, AlgSelection, GraphGenButtons} from "../index.js"
 
