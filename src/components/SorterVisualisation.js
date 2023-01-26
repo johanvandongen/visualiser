@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import Visualisation from "./Visualisation";
+import SortBars from "./SortBars";
 import { v4 as uuidv4 } from 'uuid';
 import { COLORS } from "../colors";
 import { randomValue } from "../helpers"
@@ -147,7 +147,7 @@ export default function SorterVisualisation() {
         <div style={{display:"flex"}}>
             
             <div style={visStyle}>
-                <Visualisation array={array}/>
+                <SortBars array={array}/>
             </div>
 
             <div style={sideMenuStyle}>

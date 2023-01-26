@@ -2,7 +2,7 @@ import React from "react";
 import { COLORS } from "../colors"
 import '../index.css'
 
-export default function Menu(props) {
+export default function TopMenu(props) {
 
     const menuStyle = {
         position: "relative", 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import Menu from "./components/Menu";
+import TopMenu from "./components/TopMenu";
 import { COLORS } from "./colors";
 import SorterVisualisation from "./components/SorterVisualisation"
 import GraphVisualisation from "./components/GraphVisualisation"
@@ -49,7 +49,7 @@ function App() {
     <>
     
     <div style={topMenuStyle}>
-      <Menu changeType={changeType} types={types} currentType={type}/>
+      <TopMenu changeType={changeType} types={types} currentType={type}/>
     </div>
     {types[type].comp}
     </>

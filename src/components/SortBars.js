@@ -2,7 +2,7 @@ import React from "react";
 import { COLORS } from "../colors";
 import '../index.css'
 
-export default function Visualisation({array}) {
+export default function SortBars({array}) {
 
     const containerStyle = {
         display: "flex", 
