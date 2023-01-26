@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import Visualisation from "./Visualisation";
-import SideMenu from "./SideMenu"
 import { v4 as uuidv4 } from 'uuid';
 import { COLORS } from "../colors";
 import { randomValue } from "../helpers"
@@ -8,6 +7,7 @@ import { InsertionSort } from "../sortingAlgs/InsertionSort";
 import { BubbleSort } from "../sortingAlgs/BubbleSort";
 import { InPlaceMergeSort } from "../sortingAlgs/InPlaceMergeSort";
 import { visStyle, sideMenuStyle } from "../App";
+import {SideMenuGeneric, PlayPause, AlgSelection, SorterGenButtons} from "../index.js"
 
 export const ALG = {
     INSERTION: 'insertion',
@@ -151,14 +151,12 @@ export default function SorterVisualisation() {
             </div>
 
             <div style={sideMenuStyle}>
-                <SideMenu 
-                alg={alogrithm}
-                timer={array.timer}
-                generateArray={generateArray} 
-                sortArray={runSort} 
-                reset = {resetArray}
-                pause={pauseVisualisation} 
-                switchAlg={switchSortingAlgorithm}/>
+                
+                <SideMenuGeneric>
+                    <SorterGenButtons generate={generateArray} reset={resetArray}/>
+                    <PlayPause timer={array.timer} runVis={runSort} pause={pauseVisualisation}/>
+                    <AlgSelection algs={ALG} alg={alogrithm} switchAlg={switchSortingAlgorithm}/>
+                </SideMenuGeneric>
             </div>
         </div>
     </>

@@ -6,6 +6,7 @@ export { default as SideMenuGeneric } from "./components/SideMenuComp/SideMenuGe
 export { default as  PlayPause } from "./components/SideMenuComp/PlayPause";
 export { default as AlgSelection } from "./components/SideMenuComp/AlgSelection";
 export { default as GraphGenButtons } from "./components/SideMenuComp/GraphGenButtons";
+export { default as SorterGenButtons } from "./components/SideMenuComp/SorterGenButtons";
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

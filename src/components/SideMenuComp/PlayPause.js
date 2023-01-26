@@ -19,13 +19,13 @@ export default function SideMenu(props) {
         if (props.timer !== null) {
             props.pause();
         } else {
-            props.sortArray(speed.milliSeconds)
+            props.runVis(speed.milliSeconds)
         }
     }
 
     useEffect(() => {
         if (props.timer !== null) {
-            props.sortArray(speed.milliSeconds)
+            props.runVis(speed.milliSeconds)
         }
     }, [speed])
 

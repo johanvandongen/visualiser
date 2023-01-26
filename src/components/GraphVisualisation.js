@@ -191,7 +191,7 @@ useEffect(() => {
       <div style={sideMenuStyle}>
         <SideMenuGeneric>
           <GraphGenButtons generate={generateGraph} reset={resetNetwork}/>
-          <PlayPause timer={network.timer} sortArray={runSort} pause={pauseVisualisation}/>
+          <PlayPause timer={network.timer} runVis={runSort} pause={pauseVisualisation}/>
           <AlgSelection algs={ALG} alg={alogrithm} switchAlg={switchAlgorithm}/>
         </SideMenuGeneric>
       </div>
