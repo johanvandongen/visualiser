@@ -8,25 +8,28 @@ export class DFS extends GraphAlgorithm {
             return []
         }
 
-        let moves = this.DFS(start, end, [], adjMatrix, [])
-        console.log("DFS moves", moves)
-        return moves
+        let steps = []
+
+        for (const step of this.dfs(start, end, [], adjMatrix, [])) {
+            steps.push(step);
+        }
+
+        console.log("DFS moves", steps)
+        return steps
     
         
     }
 
-    DFS(node, end, visited, adjMatrix, moves) {
+    * dfs(node, end, visited, adjMatrix, moves) {
 
         visited.push(node)
 
-        moves.push({visited: JSON.stringify(visited), current: node})
+        yield {visited: JSON.stringify(visited), current: node}
 
         for (const v of this.get_neighbours(node, adjMatrix)) {
             if (!visited.includes(v)) {
-                this.DFS(v, end, visited, adjMatrix, moves)
+                yield * this.dfs(v, end, visited, adjMatrix, moves)
             }
         }
-        return moves
-
     }
 }
