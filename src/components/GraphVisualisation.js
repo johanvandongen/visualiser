@@ -68,8 +68,9 @@ export default function GraphVisualisation() {
   const [height, setHeight] = useState(100);
   const demoRef = useRef();
   
-  const [network, setNetwork] = useState({adjMatrix: [], initNodesPositions: [], nodesPositions: [], step:0, start: 0, current: 0, timer: null})
+  const [network, setNetwork] = useState({adjMatrix: [], initNodesPositions: [], nodesPositions: [], step:0, start: 0, current: 0, timer: null, visCompleted: false, reset: 0})
   const [moves, setMoves] = useState([])
+  const [steps, setSteps] = useState()
   const [alogrithm, setAlgorithm] = useState(ALG.BFS)
   const timerIdRef = useRef();
 
@@ -77,96 +78,102 @@ export default function GraphVisualisation() {
   const runAnimation = () => {
         
     setNetwork((prev) => {
-
-    if (prev.step > moves.length-1) {
+      let nextStep = steps.next()
+      if (nextStep.done === true) {
         clearInterval(prev.timer)
-        return {...prev, timer:null}
-    }
+        return {...prev, visCompleted: true, timer:null}
+      }
 
-    let nodeColors = prev.nodesPositions.map((n, i) => ({...n, color: moves[prev.step].visited.includes(i) ? "red" : "white"}))
-    nodeColors[moves[prev.step].current].color = "purple"
-    nodeColors[prev.start].color = "green"
+      let nodeColors = prev.nodesPositions.map((n, i) => ({...n, color: nextStep.value.visited.includes(i) ? "red" : "white"}))
+      nodeColors[nextStep.value.current].color = "purple"
+      nodeColors[prev.start].color = "green"
+      console.log("worked at least once")
+      return {
+      ...prev, nodesPositions: nodeColors, step: prev.step+1
+      }});
+  }
 
-    return {
-    ...prev, nodesPositions: nodeColors, step: prev.step+1
-    }});
-}
+  // due to strict mode setArray runs twice with the same end result cus no modifications, however
+  // two timers get created and we need to have EXACTLY 1 (otherwise pause will not work).
+  // Currently uses a useRef to store timer id which we clear on second call, but this seems a bit hacky
+  // so this might break later on!
+  // We can also use a global variable instead of useRef I think...
+  const runSort = (ms) => {
 
-// due to strict mode setArray runs twice with the same end result cus no modifications, however
-// two timers get created and we need to have EXACTLY 1 (otherwise pause will not work).
-// Currently uses a useRef to store timer id which we clear on second call, but this seems a bit hacky
-// so this might break later on!
-// We can also use a global variable instead of useRef I think...
-const runSort = (ms) => {
+      setNetwork((prev) => {
+      clearInterval(timerIdRef.current)
+      const intervalTimer = setInterval(() => runAnimation(), ms)
+      
+      timerIdRef.current = intervalTimer;
+      console.log("timer set", intervalTimer)
+      return {...prev, timer: intervalTimer}
+      })
+  }
+
+  // Clear timer and update the state
+  const pauseVisualisation = () => {
+    setNetwork((prev) => {
+    clearInterval(prev.timer) // Works even if prev.timer is null
+    return {...prev, timer: null}
+    })
+  }
+
+  const switchAlgorithm = (event) => {
 
     setNetwork((prev) => {
-    clearInterval(timerIdRef.current)
-    const intervalTimer = setInterval(() => runAnimation(), ms)
-    
-    timerIdRef.current = intervalTimer;
-    console.log("timer set", intervalTimer)
-    return {...prev, timer: intervalTimer}
-    })
-}
+    clearInterval(network.timer)
+    return {...prev, step:0, timer:null }
+    }) 
 
-// Clear timer and update the state
-const pauseVisualisation = () => {
-  setNetwork((prev) => {
-  clearInterval(prev.timer) // Works even if prev.timer is null
-  return {...prev, timer: null}
-  })
-}
-
-const switchAlgorithm = (event) => {
-
-  setNetwork((prev) => {
-  clearInterval(network.timer)
-  return {...prev, step:0, timer:null }
-  }) 
-
-  setAlgorithm(event.target.value);
-  console.log("Switched to", event.target.value)
-}
+    setAlgorithm(event.target.value);
+    console.log("Switched to", event.target.value)
+  }
 
 // Set new moves
-useEffect(() => { 
-  setMoves((prev) => {
-  let traverser;
-  if (alogrithm === ALG.BFS) {
-    traverser = new BFS();
-  } else if (alogrithm === ALG.DFS) {
-    traverser = new DFS();
+// useEffect(() => { 
+//   setMoves((prev) => {
+//   let traverser;
+//   if (alogrithm === ALG.BFS) {
+//     traverser = new BFS();
+//   } else if (alogrithm === ALG.DFS) {
+//     traverser = new DFS();
+//   }
+//   // gen.current = traverser.bfs(0,1, network.adjMatrix);
+//   return traverser.get_graph_steps(0,1, network.adjMatrix)
+//   });
+// }, [network.initNodesPositions, alogrithm])
+  const algorithmSelector = (alg, adjMatrix) => {
+    
+    setSteps((prev) => {
+      let traverser;
+      if (alg === ALG.BFS) {
+        traverser = new BFS();
+      } else if (alg === ALG.DFS) {
+        traverser = new DFS();
+      }
+      return traverser.stepGenerator(0, 1, adjMatrix)
+    }); 
   }
-  return traverser.get_graph_steps(0,1, network.adjMatrix)
-  });
-}, [network.initNodesPositions, alogrithm])
 
+  useEffect(() => { 
+    algorithmSelector(alogrithm, network.adjMatrix);
+  }, [network.initNodesPositions, alogrithm, network.reset])
 
-  // Handles canvas size to fit in the parent div
-  useEffect(() => {
-    const resizeObserver = new ResizeObserver((event) => {
-      setWidth(event[0].contentBoxSize[0].inlineSize);
-      setHeight(event[0].contentBoxSize[0].blockSize);
-    });
-
-    if (demoRef) {
-      resizeObserver.observe(demoRef.current);
+    const generateGraph = () => {
+      setNetwork((prev) => {
+        clearInterval(prev.timer);
+        let newM = generateGraphMatrix();
+        return {...prev, adjMatrix: newM[0], initNodesPositions: newM[1],  nodesPositions: newM[1], timer: null}
+      })
     }
-  }, [demoRef]);
-
-  const generateGraph = () => {
-    setNetwork((prev) => {
-      let newM = generateGraphMatrix();
-      return {...prev, adjMatrix: newM[0], initNodesPositions: newM[1],  nodesPositions: newM[1]}
-    })
-  }
 
   // When the nodepositions are reset, no new moves are generated. But the old moves are still
   // correct and we set the step to 0 so that it start correctly again
   const resetNetwork = () => {
     setNetwork((prev) => {
-    clearInterval(prev.timer);
-    return {...prev, nodesPositions: prev.initNodesPositions, step:0, timer:null}
+      clearInterval(prev.timer);
+
+      return {...prev, nodesPositions: prev.initNodesPositions, step:0, timer:null, reset: (prev.reset + 1) % 2}
     })
 }
 
@@ -180,6 +187,18 @@ useEffect(() => {
       return prev
     })
   }, [width, height])
+
+  // Handles canvas size to fit in the parent div
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver((event) => {
+      setWidth(event[0].contentBoxSize[0].inlineSize);
+      setHeight(event[0].contentBoxSize[0].blockSize);
+    });
+
+    if (demoRef) {
+      resizeObserver.observe(demoRef.current);
+    }
+  }, [demoRef]);
 
   return (
     <div style={{display: "flex"}}>

@@ -20,6 +20,10 @@ export class DFS extends GraphAlgorithm {
         
     }
 
+    stepGenerator(start, end, adjMatrix) {
+        return this.dfs(start, end, [], adjMatrix, [])
+    }
+
     * dfs(node, end, visited, adjMatrix, moves) {
 
         visited.push(node)

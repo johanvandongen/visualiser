@@ -2,7 +2,7 @@ import { GraphAlgorithm } from "./GraphAlgorithm"
 
 export class BFS extends GraphAlgorithm {
 
-    * bfs(start, end, adjMatrix) {
+    * stepGenerator(start, end, adjMatrix) {
 
         let visited = [start]
         let q = [start]
