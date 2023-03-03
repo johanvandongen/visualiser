@@ -157,6 +157,8 @@ const reducer = (state, action) => {
         ...state,
         adjList: {...state.adjList, [v]: adjV, [w]: adjW}
       };
+    case 'update':
+      return {...state, adjList: action.adj, nodes: action.nodes}
     default:
       return state
   }
@@ -178,21 +180,30 @@ export default function GraphVisualisation() {
 
   // Sorts one step
   const runAnimation = () => {
+    let nextStep = steps.next()
+    if (nextStep.done === true) {
+      setNetwork((prev) => {
+        clearInterval(prev.timer) 
+        return {...prev, visCompleted: true, timer: null}
+      })
+    } else {
+      dispatchNetworkGraph({type: 'update', adj:nextStep.value.adj, nodes:nextStep.value.nodes})
+    }
         
-    setNetwork((prev) => {
-      let nextStep = steps.next()
-      if (nextStep.done === true) {
-        clearInterval(prev.timer)
-        return {...prev, visCompleted: true, timer:null}
-      }
+    // setNetwork((prev) => {
+    //   let nextStep = steps.next()
+    //   if (nextStep.done === true) {
+    //     clearInterval(prev.timer)
+    //     return {...prev, visCompleted: true, timer:null}
+    //   }
 
-      let nodeColors = prev.nodesPositions.map((n, i) => ({...n, color: nextStep.value.visited.includes(i) ? "red" : "white"}))
-      nodeColors[nextStep.value.current].color = "purple"
-      nodeColors[prev.start].color = "green"
-      console.log("worked at least once")
-      return {
-      ...prev, nodesPositions: nodeColors, step: prev.step+1
-      }});
+    //   let nodeColors = prev.nodesPositions.map((n, i) => ({...n, color: nextStep.value.visited.includes(i) ? "red" : "white"}))
+    //   nodeColors[nextStep.value.current].color = "purple"
+    //   nodeColors[prev.start].color = "green"
+    //   console.log("worked at least once")
+    //   return {
+    //   ...prev, nodesPositions: nodeColors, step: prev.step+1
+    //   }});
   }
 
   // due to strict mode setArray runs twice with the same end result cus no modifications, however
@@ -244,7 +255,7 @@ export default function GraphVisualisation() {
 //   return traverser.get_graph_steps(0,1, network.adjMatrix)
 //   });
 // }, [network.initNodesPositions, alogrithm])
-  const algorithmSelector = (alg, adjMatrix) => {
+  const algorithmSelector = (alg, adjMatrix, nodes) => {
     
     setSteps((prev) => {
       let traverser;
@@ -253,12 +264,13 @@ export default function GraphVisualisation() {
       } else if (alg === ALG.DFS) {
         traverser = new DFS();
       }
-      return traverser.stepGenerator(0, 1, adjMatrix)
+      return traverser.stepGenerator(1, 1, adjMatrix, nodes)
     }); 
   }
 
   useEffect(() => { 
-    algorithmSelector(alogrithm, network.adjMatrix);
+    // algorithmSelector(alogrithm, network.adjMatrix);
+    algorithmSelector(alogrithm, networkGraph.adjList, networkGraph.nodes);
   }, [network.initNodesPositions, alogrithm, network.reset])
 
     const generateGraph = () => {
