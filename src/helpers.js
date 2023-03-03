@@ -11,6 +11,21 @@ export const arraysAreEqual = (arr1, arr2) => {
     return true;
 }
 
+/**
+ * 
+ * @param min minimum value that is included
+ * @param max maximum value that is included
+ * @returns random value between min and max
+ */
 export const randomValue = (min, max) => {
     return Math.floor(Math.random()*(max-min+1)+min)
   }
+
+// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+export function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array
+}

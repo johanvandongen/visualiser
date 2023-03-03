@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 import {COLORS} from '../colors.js'
 import GraphArea from "./GraphArea"
+import GraphArea2 from "./GraphArea2"
 import { visStyle, sideMenuStyle } from "../App.js";
 import { BFS } from '../graphAlgs/BFS'
 import { DFS } from '../graphAlgs/DFS'
-import { randomValue } from '../helpers.js'
+import { randomValue, shuffleArray } from '../helpers.js'
 import {SideMenuGeneric, PlayPause, AlgSelection, GraphGenButtons} from "../index.js"
 
 // Generate new graph. This function should indicate the edges and node positions
@@ -16,7 +17,9 @@ function generateGraphMatrix() {
   
   let nodesPositions;
   let adjMatrix;
-  if (type === 1) {
+  let adjList;
+
+  if (type === 2) {
     
     nodesPositions = [
       {x:10, y:15, color: "purple"}, // 1
@@ -48,13 +51,18 @@ function generateGraphMatrix() {
     ];
 
   } else {
-    nodesPositions = [{x:10, y:50}, {x:50, y:50}, {x:20, y:70}]
+    nodesPositions = [{x:10, y:50, color: "white"}, {x:50, y:50, color: "white"}, {x:20, y:70, color: "white"}]
+    adjList = {
+      1: [2, 3],
+      2: [1],
+      3: [1]
+    }
     adjMatrix = [
       [0, 1, 1], 
       [1, 0, 0], 
       [1, 0, 0]];
   }
-  return [adjMatrix, nodesPositions]
+  return [adjMatrix, nodesPositions, adjList]
 }
 
 export const ALG = {
@@ -62,13 +70,107 @@ export const ALG = {
   DFS: 'dfs',
 }
 
+const generateAdjList = (directed) => {
+  const STARTCOLOR = "black"
+  let adj = {
+    1: shuffleArray([2,4,5]).slice(0, randomValue(0, 3)),
+    2: shuffleArray([1,3,5,7]).slice(0, randomValue(0, 4)),
+    3: shuffleArray([2,7,8]).slice(0, randomValue(0, 3)),
+    4: shuffleArray([1,5,10,9]).slice(0, randomValue(0, 4)),
+    5: shuffleArray([1,2,4,6,10]).slice(0, randomValue(0, 5)),
+    6: shuffleArray([2,5,7,10,11,12]).slice(0, randomValue(0, 6)),
+    7: shuffleArray([2,3,6,8,12]).slice(0, randomValue(0, 5)),
+    8: shuffleArray([3,7,12,13]).slice(0, randomValue(0, 4)),
+    9:[],
+    10:[],
+    11:[],
+    12:[],
+    13:[],
+  }
+  if (!directed) {
+    for(const node1 in adj) {
+      for (const node2 of adj[node1]) {
+        if (!adj[node2].includes(+node1)) {
+          adj[node2].push(+node1)
+        }
+      }
+    }
+  }
+
+  for (const node1 in adj) {
+    adj[node1] = adj[node1].map(val => ({node: val, weight: 1, color: STARTCOLOR}))
+  }
+  return adj
+}
+
+const initialState = {
+  nodes: [
+  {x:10, y:15, color: "purple"}, // 1
+  {x:30, y:55, color: "white"}, // 2
+  {x:10, y:55, color: "white"}, // 3
+  {x:30, y:15, color: "white"}, // 4
+  {x:30, y:95, color: "white"}, // 5
+  {x:90, y:55, color: "white"}, // 6
+  {x:50, y:55, color: "white"}, // 7
+  {x:50, y:95, color: "white"}, // 8
+],
+  adjList: generateAdjList(false),
+  directed: false,
+}
+
+
+const reducer = (state, action) => {
+  switch(action.type) {
+    case 'addVertex':
+      return {...state,
+        nodes: [...state.nodes, action.v],
+        adjList: {...state.adjList, [action.v]: []}
+      }
+    case 'addEdge':
+      
+      let v = action.v
+      let adjV;
+      if (!state.adjList.hasOwnProperty(v)) {
+        adjV = []
+      } else {
+        adjV = [...state.adjList.v]
+      }
+      let w = action.w
+      let adjW
+      if (!state.adjList.hasOwnProperty(w)) {
+        adjW = []
+      } else {
+        adjW = [...state.adjList.w]
+      }
+
+      if (!adjV.includes(w)) {
+        adjV.push(w)
+      }
+
+      if (!adjW.includes(v)) {
+        adjW.push(v)
+      }
+
+      // Bracket notation 
+      // https://stackoverflow.com/questions/2241875/how-to-create-an-object-property-from-a-variable-value-in-javascript
+      return {
+        ...state,
+        adjList: {...state.adjList, [v]: adjV, [w]: adjW}
+      };
+    default:
+      return state
+  }
+}
+
 export default function GraphVisualisation() {
+  
   
   const [width, setWidth] = useState(100);
   const [height, setHeight] = useState(100);
   const demoRef = useRef();
   
-  const [network, setNetwork] = useState({adjMatrix: [], initNodesPositions: [], nodesPositions: [], step:0, start: 0, current: 0, timer: null, visCompleted: false, reset: 0})
+  const [network, setNetwork] = useState({adjMatrix: [], adjList: {}, initNodesPositions: [], nodesPositions: [], step:0, start: 0, current: 0, timer: null, visCompleted: false, reset: 0})
+  const [networkGraph, dispatchNetworkGraph] = useReducer(reducer, initialState);
   const [moves, setMoves] = useState([])
   const [steps, setSteps] = useState()
   const [alogrithm, setAlgorithm] = useState(ALG.BFS)
@@ -163,7 +265,7 @@ export default function GraphVisualisation() {
       setNetwork((prev) => {
         clearInterval(prev.timer);
         let newM = generateGraphMatrix();
-        return {...prev, adjMatrix: newM[0], initNodesPositions: newM[1],  nodesPositions: newM[1], timer: null}
+        return {...prev, adjMatrix: newM[0], adjList: newM[2], initNodesPositions: newM[1],  nodesPositions: newM[1], timer: null}
       })
     }
 
@@ -182,7 +284,7 @@ export default function GraphVisualisation() {
     setNetwork((prev) => {
       if (prev.initNodesPositions === null || prev.initNodesPositions.length === 0) {
         let newM = generateGraphMatrix();
-        return {...prev, adjMatrix: newM[0], initNodesPositions: newM[1],  nodesPositions: newM[1]}
+        return {...prev, adjMatrix: newM[0], adjList: newM[2], initNodesPositions: newM[1],  nodesPositions: newM[1]}
       }
       return prev
     })
@@ -204,7 +306,8 @@ export default function GraphVisualisation() {
     <div style={{display: "flex"}}>
       
       <div ref={demoRef} style={visStyle}>
-        <GraphArea width={width} height={height} network={network}/>
+        {/* <GraphArea width={width} height={height} network={network}/> */}
+        <GraphArea2 width={width} height={height} network={networkGraph}/>
       </div>
       
       <div style={sideMenuStyle}>
@@ -212,6 +315,7 @@ export default function GraphVisualisation() {
           <GraphGenButtons generate={generateGraph} reset={resetNetwork}/>
           <PlayPause timer={network.timer} runVis={runSort} pause={pauseVisualisation}/>
           <AlgSelection algs={ALG} alg={alogrithm} switchAlg={switchAlgorithm}/>
+          <button onClick={() => {dispatchNetworkGraph({type: 'addEdge', v:1, w:2})}}>edge</button>
         </SideMenuGeneric>
       </div>
     </div>
