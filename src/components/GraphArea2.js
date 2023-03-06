@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Stage, Layer, Text, Circle } from 'react-konva';
+import { Stage, Layer, Text, Circle, Group } from 'react-konva';
 import Edge from './Edge'
+import Node from './Node'
 
 export default function GraphVisualisation(props) {
   // console.log("area rerendered")
@@ -95,19 +96,14 @@ export default function GraphVisualisation(props) {
               />
             ))}
 
-            {nodes.map((node) => (
-              <Circle
-                key={node.id}
-                id={node.id}
-                x={node.x}
-                y={node.y}
-                radius={nodeSize}
-                // fill="white"
-                fill={node.color}
-                draggable
-                shadowBlur={10}
-                shadowOpacity={0.6}
-                onDragMove={handleDrag}
+            {nodes.map((node, index) => (
+              <Node
+                key={"Node" + index}
+                id={"Node" + index}
+                node={node}
+                nodeSize={nodeSize}
+                handleDrag={handleDrag}
+                index={index}
               />
             ))}
           </Layer>
