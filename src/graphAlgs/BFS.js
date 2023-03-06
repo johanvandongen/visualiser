@@ -36,28 +36,32 @@ export class BFS extends GraphAlgorithm {
             yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
 
             for (const v of adjListCopy[node]) {
-                v.color = "orange"
-                yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
 
                 if (!visited.includes(v.node)) {
+                    
+                    v.color = "orange"
+                    yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
+
                     visited.push(v.node)
                     q.push(v.node)
                     yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
+
+                    // Change color to gray after edge is used
+                    v.color = "gray"
+                    yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
                 }
 
-                // Change color to gray after edge is used
-                v.color = "gray"
-                yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
+                
             }
         }
     }
     
     color(start, visited, queue, current, nodes) {
         for (let i = 0; i < nodes.length; i++) {
-            if (i+1 === current){
-                nodes[i].color = "orange"
-            } else if (i+1 === start) {
+            if (i+1 === start){
                 nodes[i].color = "green"
+            } else if (i+1 === current) {
+                nodes[i].color = "orange"
             } else if (visited.includes(i+1) && !queue.includes(i+1)) {
                 nodes[i].color = "gray"
             } else if (queue.includes(i+1)) {
