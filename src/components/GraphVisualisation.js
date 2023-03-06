@@ -73,20 +73,32 @@ export const ALG = {
 const generateAdjList = (directed) => {
   const STARTCOLOR = "black"
   let adj = {
-    1: shuffleArray([2,4,5]).slice(0, randomValue(0, 3)),
-    2: shuffleArray([1,3,5,7]).slice(0, randomValue(0, 4)),
-    3: shuffleArray([2,7,8]).slice(0, randomValue(0, 3)),
-    4: shuffleArray([1,5,10,9]).slice(0, randomValue(0, 4)),
-    5: shuffleArray([1,2,4,6,10]).slice(0, randomValue(0, 5)),
-    6: shuffleArray([2,5,7,10,11,12]).slice(0, randomValue(0, 6)),
-    7: shuffleArray([2,3,6,8,12]).slice(0, randomValue(0, 5)),
-    8: shuffleArray([3,7,12,13]).slice(0, randomValue(0, 4)),
-    9:[],
-    10:[],
-    11:[],
-    12:[],
-    13:[],
+    1: [2,4,6],
+    2: [1,3,4,5,7],
+    3: [2,5,8],
+    4: [1,2,6,7],
+    5: [2,3,7,8,10],
+    6: [1,4,9,11],
+    7: [2,4,5,9,10,12],
+    8: [3,5,10,13],
+    9: [4,6,7,11,12,14],
+    10: [5,7,8,12,13,15],
+    11: [6,9,14,16],
+    12: [7,9,10,14,15,17],
+    13: [8,10,15,18],
+    14: [9,11,12,16,17],
+    15: [10,12,13,17,18],
+    16: [11,14,17],
+    17: [12,14,15,16,18],
+    18: [13,15,17],
   }
+
+  for(const node1 in adj) {
+    for (const node2 of adj[node1]) {
+      adj[node2] = shuffleArray(adj[node2]).slice(0, randomValue(0, adj[node2].length))
+    }
+  }
+
   if (!directed) {
     for(const node1 in adj) {
       for (const node2 of adj[node1]) {
@@ -103,17 +115,40 @@ const generateAdjList = (directed) => {
   return adj
 }
 
+const generateNodes = (w, h, margin) => {
+  let nodes = [];
+  let xStep = (100 - margin*2) / (w-1);
+  let yStep = (100 - margin*2) / (h*2-1-1);
+  let t = xStep / 2;
+  let x = margin;
+  let y = margin;
+  let toggle = 0;
+
+  for (let row=0; row<h*2-1; row++) {
+    for(let col=0; col<w-toggle; col++) {
+      nodes.push({x:x, y:y, color:"white"})
+      x += xStep
+    }
+    y += yStep
+    x = toggle === 1 ? margin : margin+t;
+    toggle = (toggle+1) % 2;
+  }
+
+  return nodes
+}
+
 const initialState = {
-  nodes: [
-  {x:10, y:15, color: "purple"}, // 1
-  {x:30, y:55, color: "white"}, // 2
-  {x:10, y:55, color: "white"}, // 3
-  {x:30, y:15, color: "white"}, // 4
-  {x:30, y:95, color: "white"}, // 5
-  {x:90, y:55, color: "white"}, // 6
-  {x:50, y:55, color: "white"}, // 7
-  {x:50, y:95, color: "white"}, // 8
-],
+  nodes: generateNodes(3, 4, 10),
+//   nodes: [
+//   {x:10, y:15, color: "purple"}, // 1
+//   {x:30, y:55, color: "white"}, // 2
+//   {x:10, y:55, color: "white"}, // 3
+//   {x:30, y:15, color: "white"}, // 4
+//   {x:30, y:95, color: "white"}, // 5
+//   {x:90, y:55, color: "white"}, // 6
+//   {x:50, y:55, color: "white"}, // 7
+//   {x:50, y:95, color: "white"}, // 8
+// ],
   adjList: generateAdjList(false),
   directed: false,
 }
