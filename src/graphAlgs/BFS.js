@@ -44,9 +44,14 @@ export class BFS extends GraphAlgorithm {
                     q.push(v.node)
                     yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
                 }
+
+                // Change color to gray after edge is used
+                v.color = "gray"
+                yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
             }
         }
-}
+    }
+    
     color(start, visited, queue, current, nodes) {
         for (let i = 0; i < nodes.length; i++) {
             if (i+1 === current){
