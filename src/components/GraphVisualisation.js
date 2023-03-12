@@ -12,6 +12,11 @@ export const ALG = {
   DFS: 'dfs',
 }
 
+/**
+ * @param {number} w width
+ * @param {number} h height
+ * @returns adjacency list object, where nodes nearby each other in diamond like graph are connected
+ */
 const generateDiamondAdj = (w, h) => {
   let nrOfNodes = w*h + (w-1)*(h-1);
   let adj = {}
@@ -42,9 +47,16 @@ const generateDiamondAdj = (w, h) => {
   return adj
 }
 
-const generateAdjList = (w, h, directed, connectness=100) => {
+/**
+ * Uses generateDiamondAdj(w, h) for adjacency generation and then selects random edges
+ * to make graph sparser and add weight/color attributes.
+ * @param {{number: number[]}} adj adjacency list
+ * @param {boolean} directed whether the graph is directed/undirected
+ * @param {number} connectness tbd
+ * @returns adjacency list
+ */
+const generateAdjList = (adj, directed, connectness=100) => {
   const STARTCOLOR = "black"
-  let adj = generateDiamondAdj(w,h)
 
   // Select random edges
   if (connectness!==100) {
@@ -71,6 +83,7 @@ const generateAdjList = (w, h, directed, connectness=100) => {
 
   return adj
 }
+
 /**
  * 
  * @param {number} w number of nodes in a row (alternating between w and w-1)
@@ -103,7 +116,7 @@ const generateNodes = (w, h, margin) => {
 
 const initialState = {
   nodes: generateNodes(5, 5, 10),
-  adjList: generateAdjList(5, 5, false),
+  adjList: generateAdjList(generateDiamondAdj(5, 5), false),
   directed: false,
   reset: 0,
   timer: null,
@@ -118,35 +131,23 @@ const reducer = (state, action) => {
         adjList: {...state.adjList, [action.v]: []}
       }
     case 'addEdge':
-      
-      let v = action.v
-      let adjV;
-      if (!state.adjList.hasOwnProperty(v)) {
-        adjV = []
-      } else {
-        adjV = [...state.adjList.v]
-      }
-      let w = action.w
-      let adjW
-      if (!state.adjList.hasOwnProperty(w)) {
-        adjW = []
-      } else {
-        adjW = [...state.adjList.w]
+      // Not correct atm
+      let adjV = state.adjList.hasOwnProperty(action.v) ? [...state.adjList[action.v]] : []
+      let adjW = state.adjList.hasOwnProperty(action.w) ? [...state.adjList[action.w]] : []
+
+      if (!adjV.includes(action.w)) {
+        adjV.push(action.w)
       }
 
-      if (!adjV.includes(w)) {
-        adjV.push(w)
-      }
-
-      if (!adjW.includes(v)) {
-        adjW.push(v)
+      if (!adjW.includes(action.v)) {
+        adjW.push(action.v)
       }
 
       // Bracket notation 
       // https://stackoverflow.com/questions/2241875/how-to-create-an-object-property-from-a-variable-value-in-javascript
       return {
         ...state,
-        adjList: {...state.adjList, [v]: adjV, [w]: adjW}
+        adjList: {...state.adjList, [action.v]: adjV, [action.w]: adjW}
       };
     case 'update':
       return {...state, adjList: action.adj, nodes: action.nodes}
@@ -181,7 +182,7 @@ export default function GraphVisualisation() {
   const timerIdRef = useRef();
 
   // Sorts one step
-  const runAnimation = () => {
+  const runVisStep = () => {
     let nextStep = steps.next()
     if (nextStep.done === true) {
       clearInterval(timerIdRef.current)
@@ -196,10 +197,10 @@ export default function GraphVisualisation() {
   // Currently uses a useRef to store timer id which we clear on second call, but this seems a bit hacky
   // so this might break later on!
   // We can also use a global variable instead of useRef I think...
-  const runSort = (ms) => {
+  const runVis = (ms) => {
     if (networkGraph.visCompleted === false) {
       clearInterval(timerIdRef.current)
-      const intervalTimer = setInterval(() => runAnimation(), ms)
+      const intervalTimer = setInterval(() => runVisStep(), ms)
       timerIdRef.current = intervalTimer;
       dispatchNetworkGraph({type:'triggerStartVis', timer: intervalTimer, visCompleted: false, trigger: true})
     }
@@ -219,21 +220,21 @@ export default function GraphVisualisation() {
     console.log("Switched to", event.target.value)
   }
 
-// Set new moves
-const algorithmSelector = (alg, adjMatrix, nodes) => {
-  console.log("new steps")
-  
-  setSteps((prev) => {
-    let traverser;
-    if (alg === ALG.BFS) {
-      traverser = new BFS();
-    } else if (alg === ALG.DFS) {
-      traverser = new DFS();
-    }
-    console.log("switched to: ", alg)
-    return traverser.stepGenerator(1, 1, adjMatrix, nodes)
-  }); 
-}
+  // Set new moves
+  const algorithmSelector = (alg, adjMatrix, nodes) => {
+    console.log("new steps")
+    
+    setSteps((prev) => {
+      let traverser;
+      if (alg === ALG.BFS) {
+        traverser = new BFS();
+      } else if (alg === ALG.DFS) {
+        traverser = new DFS();
+      }
+      console.log("switched to: ", alg)
+      return traverser.stepGenerator(1, 1, adjMatrix, nodes)
+    }); 
+  }
 
   useEffect(() => { 
     if (networkGraph.visCompleted === false && networkGraph.timer === null) {
@@ -251,7 +252,7 @@ const algorithmSelector = (alg, adjMatrix, nodes) => {
     let w = 4
     let h = 4
     let nodes = generateNodes(w, h, 5)
-    let adj = generateAdjList(w,h, false, 80)
+    let adj = generateAdjList(generateDiamondAdj(w,h), false, 80)
 
     dispatchNetworkGraph({type: 'update', adj:adj, nodes:nodes})
     dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true})
@@ -261,7 +262,6 @@ const algorithmSelector = (alg, adjMatrix, nodes) => {
   // correct and we set the step to 0 so that it start correctly again
   const resetNetwork = () => {
     clearInterval(timerIdRef.current)
-    // dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true})
     dispatchNetworkGraph({type: 'reset'})
 }
 
@@ -287,9 +287,8 @@ const algorithmSelector = (alg, adjMatrix, nodes) => {
       <div style={sideMenuStyle}>
         <SideMenuGeneric>
           <GraphGenButtons generate={generateGraph} reset={resetNetwork}/>
-          <PlayPause timer={networkGraph.timer} runVis={runSort} pause={pauseVisualisation}/>
+          <PlayPause timer={networkGraph.timer} runVis={runVis} pause={pauseVisualisation}/>
           <AlgSelection algs={ALG} alg={alogrithm} switchAlg={switchAlgorithm}/>
-          <button onClick={() => {dispatchNetworkGraph({type: 'addEdge', v:1, w:2})}}>edge</button>
         </SideMenuGeneric>
       </div>
     </div>
