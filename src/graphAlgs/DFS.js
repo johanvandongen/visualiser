@@ -8,25 +8,64 @@ export class DFS extends GraphAlgorithm {
             return []
         }
 
-        let moves = this.DFS(start, end, [], adjMatrix, [])
-        console.log("DFS moves", moves)
-        return moves
+        let steps = []
+
+        for (const step of this.dfs(start, end, [], adjMatrix, [])) {
+            steps.push(step);
+        }
+
+        console.log("DFS moves", steps)
+        return steps
     
         
     }
 
-    DFS(node, end, visited, adjMatrix, moves) {
+    stepGenerator(start, end, adjList, nodes) {
+        const adjListCopy = structuredClone(adjList)
+        const nodesCopy = structuredClone(nodes)
+        return this.dfs(start, start, end, [], adjListCopy, nodesCopy)
+    }
+
+    * dfs(start, node, end, visited, adj, nodes) {
 
         visited.push(node)
 
-        moves.push({visited: JSON.stringify(visited), current: node})
+        yield {adj: adj, nodes: this.color(start, visited, node, nodes)}
 
-        for (const v of this.get_neighbours(node, adjMatrix)) {
-            if (!visited.includes(v)) {
-                this.DFS(v, end, visited, adjMatrix, moves)
+        for (const v of adj[node]) {
+            if (!visited.includes(v.node)) {
+                v.color = "orange"
+                
+                for (const u of adj[v.node]) {
+                    if (u.node === node) {
+                        u.color = "orange"
+                    }
+                }
+
+                yield * this.dfs(start, v.node, end, visited, adj, nodes)
+                
+                // Cool backtrack effect
+                // v.color = "gray"
+                // for (const u of adj[v.node]) {
+                //     if (u.node === node) {
+                //         u.color = "gray"
+                //     }
+                // }
+                // yield {adj: adj, nodes: this.color(start, visited, node, nodes)}
             }
         }
-        return moves
+    }
 
+    color(start, visited, current, nodes) {
+        for (let i = 0; i < nodes.length; i++) {
+            if (i+1 === start){
+                nodes[i].color = "green"
+            } else if (i+1 === current) {
+                nodes[i].color = "orange"
+            } else if (visited.includes(i+1) ) {
+                nodes[i].color = "gray"
+            }
+        }
+        return nodes
     }
 }

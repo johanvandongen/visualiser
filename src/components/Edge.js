@@ -8,7 +8,7 @@ export default function GraphVisualisation(props) {
         key = {props.id}
         id = {props.id}
             points = {[props.node1.x, props.node1.y, props.node2.x, props.node2.y]}
-            stroke = 'black'
+            stroke = {props.color}
             strokeWidth = {3}
         />
     )
