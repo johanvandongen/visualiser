@@ -29,3 +29,20 @@ export function shuffleArray(array) {
     }
     return array
 }
+
+/**
+ * 
+ * @param l arr
+ * @param s start bound included
+ * @param e end bound included
+ * @returns 
+ */
+export function inBound(l, s, e) {
+    let newArr = []
+    for (const val of l) {
+        if (s <= val && val <= e) {
+            newArr.push(val)
+        }
+    }
+    return newArr
+}

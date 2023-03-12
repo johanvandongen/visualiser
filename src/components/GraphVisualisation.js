@@ -5,7 +5,7 @@ import GraphArea2 from "./GraphArea2"
 import { visStyle, sideMenuStyle } from "../App.js";
 import { BFS } from '../graphAlgs/BFS'
 import { DFS } from '../graphAlgs/DFS'
-import { randomValue, shuffleArray } from '../helpers.js'
+import { randomValue, shuffleArray, inBound } from '../helpers.js'
 import {SideMenuGeneric, PlayPause, AlgSelection, GraphGenButtons} from "../index.js"
 
 // Generate new graph. This function should indicate the edges and node positions
@@ -70,34 +70,54 @@ export const ALG = {
   DFS: 'dfs',
 }
 
-const generateAdjList = (directed) => {
-  const STARTCOLOR = "black"
-  let adj = {
-    1: [2,4,6],
-    2: [1,3,4,5,7],
-    3: [2,5,8],
-    4: [1,2,6,7],
-    5: [2,3,7,8,10],
-    6: [1,4,9,11],
-    7: [2,4,5,9,10,12],
-    8: [3,5,10,13],
-    9: [4,6,7,11,12,14],
-    10: [5,7,8,12,13,15],
-    11: [6,9,14,16],
-    12: [7,9,10,14,15,17],
-    13: [8,10,15,18],
-    14: [9,11,12,16,17],
-    15: [10,12,13,17,18],
-    16: [11,14,17],
-    17: [12,14,15,16,18],
-    18: [13,15,17],
+const generateAdj = (w, h) => {
+  console.log("im run")
+  let nrOfNodes = w*h + (w-1)*(h-1);
+  let adj = {}
+
+  for (let i=1; i<=nrOfNodes; i++) {
+    //todo create initial adj if needed
   }
 
-  for(const node1 in adj) {
-    for (const node2 of adj[node1]) {
-      adj[node2] = shuffleArray(adj[node2]).slice(0, randomValue(0, adj[node2].length))
+  let toggle = 0;
+  let count = 1
+  for (let row=0; row<h*2-1; row++) {
+    for(let col=0; col<w-toggle; col++) {
+
+      if (col===0 && toggle===0) { // Left col
+        adj[count] = inBound([count-((w-1)*2+1), count-w+1, count+w, count+(w-1)*2+1], 1, nrOfNodes)
+      } else if (col===w-toggle-1 && toggle===0) { // Right col
+        adj[count] = inBound([count-((w-1)*2+1), count+w-1, count-w, count+(w-1)*2+1], 1, nrOfNodes)
+      } else if (row===0 || row===h*2-1-1) { // top and bottom row
+        if (!adj.hasOwnProperty(count)) {
+          adj[count] = inBound([count-1, count+1], 1, nrOfNodes)
+        } else {
+          adj[count].push(...inBound([count-1, count+1], 1, nrOfNodes))
+        }
+      } else {
+        adj[count] = inBound([count-w, count-w+1, count+w, count+w-1, count+w+(w-1), count-(w+(w-1))], 1, nrOfNodes)
+      }
+
+      count += 1
     }
+    toggle = (toggle+1) % 2;
   }
+  console.log("alg adj", adj)
+  return adj
+}
+
+const generateAdjList = (w, h, directed) => {
+  const STARTCOLOR = "black"
+  let adj = generateAdj(w,h)
+  console.log(adj)
+  for(const node1 in adj) {
+      adj[node1] = shuffleArray(adj[node1])
+  }
+
+  // for(const node1 in adj) {
+  //     console.log(node1)
+  //     adj[node1] = shuffleArray(adj[node1]).slice(0, randomValue(0, adj[node1].length))
+  // }
 
   if (!directed) {
     for(const node1 in adj) {
@@ -138,18 +158,8 @@ const generateNodes = (w, h, margin) => {
 }
 
 const initialState = {
-  nodes: generateNodes(3, 4, 10),
-//   nodes: [
-//   {x:10, y:15, color: "purple"}, // 1
-//   {x:30, y:55, color: "white"}, // 2
-//   {x:10, y:55, color: "white"}, // 3
-//   {x:30, y:15, color: "white"}, // 4
-//   {x:30, y:95, color: "white"}, // 5
-//   {x:90, y:55, color: "white"}, // 6
-//   {x:50, y:55, color: "white"}, // 7
-//   {x:50, y:95, color: "white"}, // 8
-// ],
-  adjList: generateAdjList(false),
+  nodes: generateNodes(5, 5, 10),
+  adjList: generateAdjList(5, 5, false),
   directed: false,
 }
 
@@ -200,6 +210,7 @@ const reducer = (state, action) => {
 }
 
 export default function GraphVisualisation() {
+  console.log("graph vis")
   
   
   const [width, setWidth] = useState(100);
