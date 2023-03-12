@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Stage, Layer, Text, Circle } from 'react-konva';
+import React, { useEffect, useState } from "react";
+import { Stage, Layer } from 'react-konva';
 import Edge from './Edge'
+import Node from './Node'
 
 export default function GraphVisualisation(props) {
   // console.log("area rerendered")
@@ -33,8 +34,8 @@ export default function GraphVisualisation(props) {
   // Load in graph network from props
   useEffect(() =>{
     setNodes((prev) => {
-      if (props.network.nodesPositions != null) {
-        return props.network.nodesPositions.map((node, index) => (
+      if (props.network.nodes != null) {
+        return props.network.nodes.map((node, index) => (
           {...node, 
             isDragging: false, 
             id: "node" + index,
@@ -47,55 +48,35 @@ export default function GraphVisualisation(props) {
     })
   }, [props])
 
-  // Loop over right triangle in adjacency matrix
+  // Loop over adjacency list
   useEffect(() => {
     setEdges(() => {
       let edges = []
-      console.log("edges calculated")
       let edges2 = new Set()
-      
-      for (let i=0; i < props.network.adjMatrix.length; i++) {
-        for (let j=i; j < props.network.adjMatrix[i].length; j++) {
-          if (props.network.adjMatrix[i][j] === 1 && i !== j) {
-            let uniqueEdgeKey = "from" + i + "to" + j
+      console.log("edges calculated")
 
-            edges.push(
-              {
-                id: uniqueEdgeKey,
-                node1: i,
-                node2: j
-              }
-            )
+      for (const node1 in props.network.adjList) {
+        for (const edge of props.network.adjList[node1]) {
+          const node2 = edge.node;
+          let uniqueEdgeKey = "from" + node1 + "to" + node2
+          if (node1 <= nodes.length && node2 <= nodes.length) {
+            if ((!props.network.directed && !edges2.has("from" + node2 + "to" + node1)) || props.network.directed) {
+              edges.push(
+                {
+                  id: uniqueEdgeKey,
+                  node1: node1 - 1, // ajdlist uses starts with node 1, while list uses 0 at start
+                  node2: node2 - 1,
+                  color: edge.color
+                }
+              )
+              edges2.add(uniqueEdgeKey)
+            }
+          } else {
+            // console.warn("An edge in the adjacency list was detected, of which at least 1 node was not included in the nodes list", 
+            // "nodes: ", node1, node2);
           }
         }
       }
-
-      // let adjList = props.network.adjList
-      // console.log("het: ", adjList)
-
-      // for (const node1 in adjList) {
-        
-      //   for (const node2 of adjList[node1]) {
-      //     let uniqueEdgeKey = "from" + node1 + "to" + node2
-
-      //     edges2.add(
-      //       {
-      //         // id: uniqueEdgeKey,
-      //         node1: node1 - 1, // ajdlist uses starts with node 1, while list uses 0 at start
-      //         node2: node2 - 1
-      //       })
-
-      //       edges.push(
-      //         {
-      //           id: uniqueEdgeKey,
-      //           node1: node1 - 1, // ajdlist uses starts with node 1, while list uses 0 at start
-      //           node2: node2 - 1
-      //         })
-      //   }
-      // }
-
-      // console.log(edges)
-      // console.log(edges2)
       
       return edges;
     })
@@ -111,22 +92,18 @@ export default function GraphVisualisation(props) {
               id={edge.id} 
               node1={nodes[edge.node1]} 
               node2={nodes[edge.node2]}
+              color={edge.color}
               />
             ))}
 
-            {nodes.map((node) => (
-              <Circle
-                key={node.id}
-                id={node.id}
-                x={node.x}
-                y={node.y}
-                radius={nodeSize}
-                // fill="white"
-                fill={node.color}
-                draggable
-                shadowBlur={10}
-                shadowOpacity={0.6}
-                onDragMove={handleDrag}
+            {nodes.map((node, index) => (
+              <Node
+                key={"Node" + index}
+                id={"Node" + index}
+                node={node}
+                nodeSize={nodeSize}
+                handleDrag={handleDrag}
+                index={index}
               />
             ))}
           </Layer>

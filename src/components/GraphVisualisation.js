@@ -1,7 +1,6 @@
 import React, { useEffect, useReducer, useRef, useState } from "react";
 import {COLORS} from '../colors.js'
 import GraphArea from "./GraphArea"
-import GraphArea2 from "./GraphArea2"
 import { visStyle, sideMenuStyle } from "../App.js";
 import { BFS } from '../graphAlgs/BFS'
 import { DFS } from '../graphAlgs/DFS'
@@ -265,8 +264,7 @@ const algorithmSelector = (alg, adjMatrix, nodes) => {
     <div style={{display: "flex"}}>
       
       <div ref={demoRef} style={visStyle}>
-        {/* <GraphArea width={width} height={height} network={network}/> */}
-        <GraphArea2 width={width} height={height} network={networkGraph}/>
+        <GraphArea width={width} height={height} network={networkGraph}/>
       </div>
       
       <div style={sideMenuStyle}>
