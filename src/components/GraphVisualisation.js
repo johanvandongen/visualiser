@@ -50,7 +50,6 @@ const generateAdjList = (w, h, directed, connectness=100) => {
   // Select random edges
   if (connectness!==100) {
     for(const node1 in adj) {
-        console.log(node1)
         adj[node1] = shuffleArray(adj[node1]).slice(0, randomValue(0, adj[node1].length))
     }
   }
@@ -73,7 +72,13 @@ const generateAdjList = (w, h, directed, connectness=100) => {
 
   return adj
 }
-
+/**
+ * 
+ * @param {number} w number of nodes in a row (alternating between w and w-1)
+ * @param {number} h number of rows of full width, so additional of h-1 rows of w-1 width
+ * @param {number} margin margin for position of nodes w.r.t graph area boundaries
+ * @returns list of nodes
+ */
 const generateNodes = (w, h, margin) => {
   let nodes = [];
   let xStep = (100 - margin*2) / (w-1);
@@ -101,6 +106,8 @@ const initialState = {
   nodes: generateNodes(5, 5, 10),
   adjList: generateAdjList(5, 5, false),
   directed: false,
+  reset: 0,
+  timer: null
 }
 
 const reducer = (state, action) => {
@@ -143,6 +150,15 @@ const reducer = (state, action) => {
       };
     case 'update':
       return {...state, adjList: action.adj, nodes: action.nodes}
+    case 'reset':
+      return {...state, 
+        adjList: Object.fromEntries(
+          Object.entries(state.adjList).map(([node, l]) => 
+          [node, l.map(edge => ({...edge, color:'black'}))])
+          ),
+        nodes: state.nodes.map((node) => ({...node, color: 'white'}))}
+    case 'triggerStartVis':
+      return {...state, reset: (state.reset + 1) % 2, timer: action.timer}
     default:
       return state
   }
@@ -152,10 +168,8 @@ export default function GraphVisualisation() {
   const [width, setWidth] = useState(100);
   const [height, setHeight] = useState(100);
   const demoRef = useRef();
-  
-  const [network, setNetwork] = useState({adjMatrix: [], adjList: {}, initNodesPositions: [], nodesPositions: [], step:0, start: 0, current: 0, timer: null, visCompleted: false, reset: 0})
+
   const [networkGraph, dispatchNetworkGraph] = useReducer(reducer, initialState);
-  const [moves, setMoves] = useState([])
   const [steps, setSteps] = useState()
   const [alogrithm, setAlgorithm] = useState(ALG.BFS)
   const timerIdRef = useRef();
@@ -164,10 +178,8 @@ export default function GraphVisualisation() {
   const runAnimation = () => {
     let nextStep = steps.next()
     if (nextStep.done === true) {
-      setNetwork((prev) => {
-        clearInterval(prev.timer) 
-        return {...prev, visCompleted: true, timer: null}
-      })
+      clearInterval(timerIdRef.current)
+      dispatchNetworkGraph({type: 'triggerStartVis', timer: null})
     } else {
       dispatchNetworkGraph({type: 'update', adj:nextStep.value.adj, nodes:nextStep.value.nodes})
     }
@@ -179,31 +191,21 @@ export default function GraphVisualisation() {
   // so this might break later on!
   // We can also use a global variable instead of useRef I think...
   const runSort = (ms) => {
-
-      setNetwork((prev) => {
-      clearInterval(timerIdRef.current)
-      const intervalTimer = setInterval(() => runAnimation(), ms)
-      
-      timerIdRef.current = intervalTimer;
-      console.log("timer set", intervalTimer)
-      return {...prev, timer: intervalTimer}
-      })
+    clearInterval(timerIdRef.current)
+    const intervalTimer = setInterval(() => runAnimation(), ms)
+    timerIdRef.current = intervalTimer;
+    dispatchNetworkGraph({type:'triggerStartVis', timer: intervalTimer})
   }
 
   // Clear timer and update the state
   const pauseVisualisation = () => {
-    setNetwork((prev) => {
-    clearInterval(prev.timer) // Works even if prev.timer is null
-    return {...prev, timer: null}
-    })
+    clearInterval(timerIdRef.current)
+    dispatchNetworkGraph({type: 'triggerStartVis', timer: null})
   }
 
   const switchAlgorithm = (event) => {
-
-    setNetwork((prev) => {
-    clearInterval(network.timer)
-    return {...prev, step:0, timer:null }
-    }) 
+    clearInterval(timerIdRef.current)
+    dispatchNetworkGraph({type: 'triggerStartVis', timer: null}) 
 
     setAlgorithm(event.target.value);
     console.log("Switched to", event.target.value)
@@ -219,42 +221,33 @@ const algorithmSelector = (alg, adjMatrix, nodes) => {
     } else if (alg === ALG.DFS) {
       traverser = new DFS();
     }
+    console.log("switched to: ", alg)
     return traverser.stepGenerator(1, 1, adjMatrix, nodes)
   }); 
 }
 
   useEffect(() => { 
     algorithmSelector(alogrithm, networkGraph.adjList, networkGraph.nodes);
-  }, [network.initNodesPositions, alogrithm, network.reset])
+  }, [alogrithm, networkGraph.reset])
 
-  // const generateGraph = () => {
-  //   setNetwork((prev) => {
-  //     clearInterval(prev.timer);
-  //     let newM = generateGraphMatrix();
-  //     return {...prev, adjMatrix: newM[0], adjList: newM[2], initNodesPositions: newM[1],  nodesPositions: newM[1], timer: null}
-  //   })
-  // }
+  const generateGraph = () => {
+    clearInterval(timerIdRef.current)
+    let w = 4
+    let h = 4
+    let nodes = generateNodes(w, h, 5)
+    let adj = generateAdjList(w,h, false, 80)
+
+    dispatchNetworkGraph({type: 'update', adj:adj, nodes:nodes})
+    dispatchNetworkGraph({type: 'triggerStartVis', timer: null})
+  }
 
   // When the nodepositions are reset, no new moves are generated. But the old moves are still
   // correct and we set the step to 0 so that it start correctly again
   const resetNetwork = () => {
-    setNetwork((prev) => {
-      clearInterval(prev.timer);
-
-      return {...prev, nodesPositions: prev.initNodesPositions, step:0, timer:null, reset: (prev.reset + 1) % 2}
-    })
+    clearInterval(timerIdRef.current)
+    dispatchNetworkGraph({type: 'triggerStartVis', timer: null})
+    dispatchNetworkGraph({type: 'reset'})
 }
-
-  // Generate network graph
-  // useEffect(() => {
-  //   setNetwork((prev) => {
-  //     if (prev.initNodesPositions === null || prev.initNodesPositions.length === 0) {
-  //       let newM = generateGraphMatrix();
-  //       return {...prev, adjMatrix: newM[0], adjList: newM[2], initNodesPositions: newM[1],  nodesPositions: newM[1]}
-  //     }
-  //     return prev
-  //   })
-  // }, [width, height])
 
   // Handles canvas size to fit in the parent div
   useEffect(() => {
@@ -278,8 +271,8 @@ const algorithmSelector = (alg, adjMatrix, nodes) => {
       
       <div style={sideMenuStyle}>
         <SideMenuGeneric>
-          {/* <GraphGenButtons generate={generateGraph} reset={resetNetwork}/> */}
-          <PlayPause timer={network.timer} runVis={runSort} pause={pauseVisualisation}/>
+          <GraphGenButtons generate={generateGraph} reset={resetNetwork}/>
+          <PlayPause timer={networkGraph.timer} runVis={runSort} pause={pauseVisualisation}/>
           <AlgSelection algs={ALG} alg={alogrithm} switchAlg={switchAlgorithm}/>
           <button onClick={() => {dispatchNetworkGraph({type: 'addEdge', v:1, w:2})}}>edge</button>
         </SideMenuGeneric>
