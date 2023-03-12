@@ -4,7 +4,6 @@ import Edge from './Edge'
 import Node from './Node'
 
 export default function GraphVisualisation(props) {
-  // console.log("area rerendered")
 
   const [nodes, setNodes] = useState([])
   const [edges, setEdges] = useState([])
@@ -53,7 +52,6 @@ export default function GraphVisualisation(props) {
     setEdges(() => {
       let edges = []
       let edges2 = new Set()
-      console.log("edges calculated")
 
       for (const node1 in props.network.adjList) {
         for (const edge of props.network.adjList[node1]) {

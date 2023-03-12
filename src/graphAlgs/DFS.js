@@ -43,6 +43,15 @@ export class DFS extends GraphAlgorithm {
                 }
 
                 yield * this.dfs(start, v.node, end, visited, adj, nodes)
+                
+                // Cool backtrack effect
+                // v.color = "gray"
+                // for (const u of adj[v.node]) {
+                //     if (u.node === node) {
+                //         u.color = "gray"
+                //     }
+                // }
+                // yield {adj: adj, nodes: this.color(start, visited, node, nodes)}
             }
         }
     }

@@ -85,7 +85,6 @@ const generateAdjList = (adj, directed, connectness=100) => {
 }
 
 /**
- * 
  * @param {number} w number of nodes in a row (alternating between w and w-1)
  * @param {number} h number of rows of full width, so additional of h-1 rows of w-1 width
  * @param {number} margin margin for position of nodes w.r.t graph area boundaries
@@ -163,7 +162,7 @@ const reducer = (state, action) => {
         visCompleted: false}
     case 'triggerStartVis':
       return {...state, 
-        reset: action.trigger ? (state.reset + 1) % 2 : state.reset, 
+        reset: action.trigger ? (state.reset + 1) % 2 : state.reset, //dummy field triggers fresh step generator object
         timer: action.timer, // Timer is ao used for play/pause text toggle
         visCompleted: action.visCompleted}
     default:
@@ -198,12 +197,10 @@ export default function GraphVisualisation() {
   // so this might break later on!
   // We can also use a global variable instead of useRef I think...
   const runVis = (ms) => {
-    if (networkGraph.visCompleted === false) {
-      clearInterval(timerIdRef.current)
-      const intervalTimer = setInterval(() => runVisStep(), ms)
-      timerIdRef.current = intervalTimer;
-      dispatchNetworkGraph({type:'triggerStartVis', timer: intervalTimer, visCompleted: false, trigger: true})
-    }
+    clearInterval(timerIdRef.current)
+    const intervalTimer = setInterval(() => runVisStep(), ms)
+    timerIdRef.current = intervalTimer;
+    dispatchNetworkGraph({type:'triggerStartVis', timer: intervalTimer, visCompleted: false, trigger: true})
   }
 
   // Clear timer and update the state
@@ -222,7 +219,6 @@ export default function GraphVisualisation() {
 
   // Set new moves
   const algorithmSelector = (alg, adjMatrix, nodes) => {
-    console.log("new steps")
     
     setSteps((prev) => {
       let traverser;
@@ -231,7 +227,6 @@ export default function GraphVisualisation() {
       } else if (alg === ALG.DFS) {
         traverser = new DFS();
       }
-      console.log("switched to: ", alg)
       return traverser.stepGenerator(1, 1, adjMatrix, nodes)
     }); 
   }
@@ -243,7 +238,6 @@ export default function GraphVisualisation() {
   }, [alogrithm, networkGraph.reset])
 
   useEffect(() => { 
-    console.log("reset??")
     dispatchNetworkGraph({type: 'reset'})
   }, [alogrithm])
 
