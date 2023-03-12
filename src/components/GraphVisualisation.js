@@ -8,79 +8,17 @@ import { DFS } from '../graphAlgs/DFS'
 import { randomValue, shuffleArray, inBound } from '../helpers.js'
 import {SideMenuGeneric, PlayPause, AlgSelection, GraphGenButtons} from "../index.js"
 
-// Generate new graph. This function should indicate the edges and node positions
-// id, dragable, color will be handled by the graphArea component.
-// For now it is hard coded. Randomizer in the future would be better
-function generateGraphMatrix() {
-
-  let type = 1//randomValue(1,2)
-  
-  let nodesPositions;
-  let adjMatrix;
-  let adjList;
-
-  if (type === 2) {
-    
-    nodesPositions = [
-      {x:10, y:15, color: "purple"}, // 1
-      {x:30, y:55, color: "white"}, // 2
-      {x:10, y:55, color: "white"}, // 3
-      {x:30, y:15, color: "white"}, // 4
-      {x:30, y:95, color: "white"}, // 5
-      {x:90, y:55, color: "white"}, // 6
-      {x:50, y:55, color: "white"}, // 7
-      {x:50, y:95, color: "white"}, // 8
-      {x:70, y:15, color: "white"}, // 9
-      {x:70, y:55, color: "white"}, // 10
-      {x:90, y:15, color: "white"}, // 11
-      {x:10, y:95, color: "white"}, // 11
-    ]
-    adjMatrix = [
-      [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1],
-      [1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0],
-      [0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
-      [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0],
-      [0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0],
-      [0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-      [0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
-      [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-      [0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-    ];
-
-  } else {
-    nodesPositions = [{x:10, y:50, color: "white"}, {x:50, y:50, color: "white"}, {x:20, y:70, color: "white"}]
-    adjList = {
-      1: [2, 3],
-      2: [1],
-      3: [1]
-    }
-    adjMatrix = [
-      [0, 1, 1], 
-      [1, 0, 0], 
-      [1, 0, 0]];
-  }
-  return [adjMatrix, nodesPositions, adjList]
-}
-
 export const ALG = {
   BFS: 'bfs',
   DFS: 'dfs',
 }
 
-const generateAdj = (w, h) => {
-  console.log("im run")
+const generateDiamondAdj = (w, h) => {
   let nrOfNodes = w*h + (w-1)*(h-1);
   let adj = {}
-
-  for (let i=1; i<=nrOfNodes; i++) {
-    //todo create initial adj if needed
-  }
-
   let toggle = 0;
   let count = 1
+
   for (let row=0; row<h*2-1; row++) {
     for(let col=0; col<w-toggle; col++) {
 
@@ -102,23 +40,22 @@ const generateAdj = (w, h) => {
     }
     toggle = (toggle+1) % 2;
   }
-  console.log("alg adj", adj)
   return adj
 }
 
-const generateAdjList = (w, h, directed) => {
+const generateAdjList = (w, h, directed, connectness=100) => {
   const STARTCOLOR = "black"
-  let adj = generateAdj(w,h)
-  console.log(adj)
-  for(const node1 in adj) {
-      adj[node1] = shuffleArray(adj[node1])
+  let adj = generateDiamondAdj(w,h)
+
+  // Select random edges
+  if (connectness!==100) {
+    for(const node1 in adj) {
+        console.log(node1)
+        adj[node1] = shuffleArray(adj[node1]).slice(0, randomValue(0, adj[node1].length))
+    }
   }
 
-  // for(const node1 in adj) {
-  //     console.log(node1)
-  //     adj[node1] = shuffleArray(adj[node1]).slice(0, randomValue(0, adj[node1].length))
-  // }
-
+  // Make sure adjacency list is correct u: [v, ..] means also v: [u, ..]
   if (!directed) {
     for(const node1 in adj) {
       for (const node2 of adj[node1]) {
@@ -129,9 +66,11 @@ const generateAdjList = (w, h, directed) => {
     }
   }
 
+  // Add attributes to each edge (weight, color, etc..)
   for (const node1 in adj) {
     adj[node1] = adj[node1].map(val => ({node: val, weight: 1, color: STARTCOLOR}))
   }
+
   return adj
 }
 
@@ -144,6 +83,7 @@ const generateNodes = (w, h, margin) => {
   let y = margin;
   let toggle = 0;
 
+  // Creates nodes in diamond like pattern
   for (let row=0; row<h*2-1; row++) {
     for(let col=0; col<w-toggle; col++) {
       nodes.push({x:x, y:y, color:"white"})
@@ -162,7 +102,6 @@ const initialState = {
   adjList: generateAdjList(5, 5, false),
   directed: false,
 }
-
 
 const reducer = (state, action) => {
   switch(action.type) {
@@ -210,9 +149,6 @@ const reducer = (state, action) => {
 }
 
 export default function GraphVisualisation() {
-  console.log("graph vis")
-  
-  
   const [width, setWidth] = useState(100);
   const [height, setHeight] = useState(100);
   const demoRef = useRef();
@@ -235,21 +171,6 @@ export default function GraphVisualisation() {
     } else {
       dispatchNetworkGraph({type: 'update', adj:nextStep.value.adj, nodes:nextStep.value.nodes})
     }
-        
-    // setNetwork((prev) => {
-    //   let nextStep = steps.next()
-    //   if (nextStep.done === true) {
-    //     clearInterval(prev.timer)
-    //     return {...prev, visCompleted: true, timer:null}
-    //   }
-
-    //   let nodeColors = prev.nodesPositions.map((n, i) => ({...n, color: nextStep.value.visited.includes(i) ? "red" : "white"}))
-    //   nodeColors[nextStep.value.current].color = "purple"
-    //   nodeColors[prev.start].color = "green"
-    //   console.log("worked at least once")
-    //   return {
-    //   ...prev, nodesPositions: nodeColors, step: prev.step+1
-    //   }});
   }
 
   // due to strict mode setArray runs twice with the same end result cus no modifications, however
@@ -289,43 +210,30 @@ export default function GraphVisualisation() {
   }
 
 // Set new moves
-// useEffect(() => { 
-//   setMoves((prev) => {
-//   let traverser;
-//   if (alogrithm === ALG.BFS) {
-//     traverser = new BFS();
-//   } else if (alogrithm === ALG.DFS) {
-//     traverser = new DFS();
-//   }
-//   // gen.current = traverser.bfs(0,1, network.adjMatrix);
-//   return traverser.get_graph_steps(0,1, network.adjMatrix)
-//   });
-// }, [network.initNodesPositions, alogrithm])
-  const algorithmSelector = (alg, adjMatrix, nodes) => {
-    
-    setSteps((prev) => {
-      let traverser;
-      if (alg === ALG.BFS) {
-        traverser = new BFS();
-      } else if (alg === ALG.DFS) {
-        traverser = new DFS();
-      }
-      return traverser.stepGenerator(1, 1, adjMatrix, nodes)
-    }); 
-  }
+const algorithmSelector = (alg, adjMatrix, nodes) => {
+  
+  setSteps((prev) => {
+    let traverser;
+    if (alg === ALG.BFS) {
+      traverser = new BFS();
+    } else if (alg === ALG.DFS) {
+      traverser = new DFS();
+    }
+    return traverser.stepGenerator(1, 1, adjMatrix, nodes)
+  }); 
+}
 
   useEffect(() => { 
-    // algorithmSelector(alogrithm, network.adjMatrix);
     algorithmSelector(alogrithm, networkGraph.adjList, networkGraph.nodes);
   }, [network.initNodesPositions, alogrithm, network.reset])
 
-    const generateGraph = () => {
-      setNetwork((prev) => {
-        clearInterval(prev.timer);
-        let newM = generateGraphMatrix();
-        return {...prev, adjMatrix: newM[0], adjList: newM[2], initNodesPositions: newM[1],  nodesPositions: newM[1], timer: null}
-      })
-    }
+  // const generateGraph = () => {
+  //   setNetwork((prev) => {
+  //     clearInterval(prev.timer);
+  //     let newM = generateGraphMatrix();
+  //     return {...prev, adjMatrix: newM[0], adjList: newM[2], initNodesPositions: newM[1],  nodesPositions: newM[1], timer: null}
+  //   })
+  // }
 
   // When the nodepositions are reset, no new moves are generated. But the old moves are still
   // correct and we set the step to 0 so that it start correctly again
@@ -338,15 +246,15 @@ export default function GraphVisualisation() {
 }
 
   // Generate network graph
-  useEffect(() => {
-    setNetwork((prev) => {
-      if (prev.initNodesPositions === null || prev.initNodesPositions.length === 0) {
-        let newM = generateGraphMatrix();
-        return {...prev, adjMatrix: newM[0], adjList: newM[2], initNodesPositions: newM[1],  nodesPositions: newM[1]}
-      }
-      return prev
-    })
-  }, [width, height])
+  // useEffect(() => {
+  //   setNetwork((prev) => {
+  //     if (prev.initNodesPositions === null || prev.initNodesPositions.length === 0) {
+  //       let newM = generateGraphMatrix();
+  //       return {...prev, adjMatrix: newM[0], adjList: newM[2], initNodesPositions: newM[1],  nodesPositions: newM[1]}
+  //     }
+  //     return prev
+  //   })
+  // }, [width, height])
 
   // Handles canvas size to fit in the parent div
   useEffect(() => {
@@ -370,7 +278,7 @@ export default function GraphVisualisation() {
       
       <div style={sideMenuStyle}>
         <SideMenuGeneric>
-          <GraphGenButtons generate={generateGraph} reset={resetNetwork}/>
+          {/* <GraphGenButtons generate={generateGraph} reset={resetNetwork}/> */}
           <PlayPause timer={network.timer} runVis={runSort} pause={pauseVisualisation}/>
           <AlgSelection algs={ALG} alg={alogrithm} switchAlg={switchAlgorithm}/>
           <button onClick={() => {dispatchNetworkGraph({type: 'addEdge', v:1, w:2})}}>edge</button>
