@@ -106,7 +106,8 @@ const initialState = {
   adjList: generateAdjList(5, 5, false),
   directed: false,
   reset: 0,
-  timer: null
+  timer: null,
+  visCompleted: false
 }
 
 const reducer = (state, action) => {
@@ -155,9 +156,15 @@ const reducer = (state, action) => {
           Object.entries(state.adjList).map(([node, l]) => 
           [node, l.map(edge => ({...edge, color:'black'}))])
           ),
-        nodes: state.nodes.map((node) => ({...node, color: 'white'}))}
+        nodes: state.nodes.map((node) => ({...node, color: 'white'})),
+        reset: (state.reset + 1) % 2,
+        timer: null,
+        visCompleted: false}
     case 'triggerStartVis':
-      return {...state, reset: (state.reset + 1) % 2, timer: action.timer}
+      return {...state, 
+        reset: action.trigger ? (state.reset + 1) % 2 : state.reset, 
+        timer: action.timer, // Timer is ao used for play/pause text toggle
+        visCompleted: action.visCompleted}
     default:
       return state
   }
@@ -178,7 +185,7 @@ export default function GraphVisualisation() {
     let nextStep = steps.next()
     if (nextStep.done === true) {
       clearInterval(timerIdRef.current)
-      dispatchNetworkGraph({type: 'triggerStartVis', timer: null})
+      dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: true, trigger: true})
     } else {
       dispatchNetworkGraph({type: 'update', adj:nextStep.value.adj, nodes:nextStep.value.nodes})
     }
@@ -190,21 +197,23 @@ export default function GraphVisualisation() {
   // so this might break later on!
   // We can also use a global variable instead of useRef I think...
   const runSort = (ms) => {
-    clearInterval(timerIdRef.current)
-    const intervalTimer = setInterval(() => runAnimation(), ms)
-    timerIdRef.current = intervalTimer;
-    dispatchNetworkGraph({type:'triggerStartVis', timer: intervalTimer})
+    if (networkGraph.visCompleted === false) {
+      clearInterval(timerIdRef.current)
+      const intervalTimer = setInterval(() => runAnimation(), ms)
+      timerIdRef.current = intervalTimer;
+      dispatchNetworkGraph({type:'triggerStartVis', timer: intervalTimer, visCompleted: false, trigger: true})
+    }
   }
 
   // Clear timer and update the state
   const pauseVisualisation = () => {
     clearInterval(timerIdRef.current)
-    dispatchNetworkGraph({type: 'triggerStartVis', timer: null})
+    dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: false})
   }
 
   const switchAlgorithm = (event) => {
     clearInterval(timerIdRef.current)
-    dispatchNetworkGraph({type: 'triggerStartVis', timer: null}) 
+    dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true}) 
 
     setAlgorithm(event.target.value);
     console.log("Switched to", event.target.value)
@@ -212,6 +221,7 @@ export default function GraphVisualisation() {
 
 // Set new moves
 const algorithmSelector = (alg, adjMatrix, nodes) => {
+  console.log("new steps")
   
   setSteps((prev) => {
     let traverser;
@@ -226,8 +236,15 @@ const algorithmSelector = (alg, adjMatrix, nodes) => {
 }
 
   useEffect(() => { 
-    algorithmSelector(alogrithm, networkGraph.adjList, networkGraph.nodes);
+    if (networkGraph.visCompleted === false && networkGraph.timer === null) {
+      algorithmSelector(alogrithm, networkGraph.adjList, networkGraph.nodes);
+    }
   }, [alogrithm, networkGraph.reset])
+
+  useEffect(() => { 
+    console.log("reset??")
+    dispatchNetworkGraph({type: 'reset'})
+  }, [alogrithm])
 
   const generateGraph = () => {
     clearInterval(timerIdRef.current)
@@ -237,14 +254,14 @@ const algorithmSelector = (alg, adjMatrix, nodes) => {
     let adj = generateAdjList(w,h, false, 80)
 
     dispatchNetworkGraph({type: 'update', adj:adj, nodes:nodes})
-    dispatchNetworkGraph({type: 'triggerStartVis', timer: null})
+    dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true})
   }
 
   // When the nodepositions are reset, no new moves are generated. But the old moves are still
   // correct and we set the step to 0 so that it start correctly again
   const resetNetwork = () => {
     clearInterval(timerIdRef.current)
-    dispatchNetworkGraph({type: 'triggerStartVis', timer: null})
+    // dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true})
     dispatchNetworkGraph({type: 'reset'})
 }
 
