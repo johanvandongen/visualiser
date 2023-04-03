@@ -98,12 +98,14 @@ const generateNodes = (w, h, margin) => {
   let x = margin;
   let y = margin;
   let toggle = 0;
+  let count = 0;
 
   // Creates nodes in diamond like pattern
   for (let row=0; row<h*2-1; row++) {
     for(let col=0; col<w-toggle; col++) {
-      nodes.push({x:x, y:y, color:"white"})
+      nodes.push({x:x, y:y, color:"white", id:'node'+count})
       x += xStep
+      count += 1
     }
     y += yStep
     x = toggle === 1 ? margin : margin+t;
@@ -149,7 +151,11 @@ const reducer = (state, action) => {
         adjList: {...state.adjList, [action.v]: adjV, [action.w]: adjW}
       };
     case 'update':
+      return {...state, adjList: action.adj, nodes: state.nodes.map((node, i) => ({...node, color: action.nodes[i].color}))}
+    case 'setNewGraph':
       return {...state, adjList: action.adj, nodes: action.nodes}
+    case 'updateNodes':
+      return {...state, reset: (state.reset + 1) % 2, nodes: state.nodes.map(node => (node.id===action.id ? Object.assign({}, node, {x: action.pos.x/action.w*100, y: action.pos.y/action.h*100}) : node))}
     case 'reset':
       return {...state, 
         adjList: Object.fromEntries(
@@ -179,6 +185,12 @@ export default function GraphVisualisation() {
   const [steps, setSteps] = useState()
   const [alogrithm, setAlgorithm] = useState(ALG.BFS)
   const timerIdRef = useRef();
+
+  const updateNodes = (id, pos) => {
+    console.log("updated nodes: ", id, pos)
+    dispatchNetworkGraph({type:'updateNodes', pos: pos, id:id, w:width, h:height})
+
+  }
 
   // Sorts one step
   const runVisStep = () => {
@@ -248,7 +260,7 @@ export default function GraphVisualisation() {
     let nodes = generateNodes(w, h, 5)
     let adj = generateAdjList(generateDiamondAdj(w,h), false, 80)
 
-    dispatchNetworkGraph({type: 'update', adj:adj, nodes:nodes})
+    dispatchNetworkGraph({type: 'setNewGraph', adj:adj, nodes:nodes})
     dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true})
   }
 
@@ -275,7 +287,7 @@ export default function GraphVisualisation() {
     <div style={{display: "flex"}}>
       
       <div ref={demoRef} style={visStyle}>
-        <GraphArea width={width} height={height} network={networkGraph}/>
+        <GraphArea width={width} height={height} network={networkGraph} updateNodes={updateNodes}/>
       </div>
       
       <div style={sideMenuStyle}>

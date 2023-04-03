@@ -4,6 +4,7 @@ import Edge from './Edge'
 import Node from './Node'
 
 export default function GraphVisualisation(props) {
+  console.log("graphh rerendered")
 
   const [nodes, setNodes] = useState([])
   const [edges, setEdges] = useState([])
@@ -14,20 +15,21 @@ export default function GraphVisualisation(props) {
   const handleDrag = (e) => {
     const id =e.target.id()
     const pos = e.target.position()
-    setNodes((prev) => {
-      if (prev != null && prev.length > 0) {
-        let nodesCopy = JSON.parse(JSON.stringify(prev))
-        for (let i = 0; i< nodesCopy.length; i++) {
+    props.updateNodes(id, pos)
+    // setNodes((prev) => {
+    //   if (prev != null && prev.length > 0) {
+    //     let nodesCopy = JSON.parse(JSON.stringify(prev))
+    //     for (let i = 0; i< nodesCopy.length; i++) {
           
-          if (nodesCopy[i].id === id) {
-            nodesCopy[i] = {...nodesCopy[i], ...pos}
-          }
-        }
-        return nodesCopy
-      } else {
-        return prev
-      }
-    })
+    //       if (nodesCopy[i].id === id) {
+    //         nodesCopy[i] = {...nodesCopy[i], ...pos}
+    //       }
+    //     }
+    //     return nodesCopy
+    //   } else {
+    //     return prev
+    //   }
+    // })
   }
 
   // Load in graph network from props
