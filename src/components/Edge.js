@@ -20,6 +20,7 @@ export default function GraphVisualisation(props) {
         height={300}
         align="center"
         verticalAlign="middle"
+        fontSize={16}
         text={props.weight}
       />}
       </>

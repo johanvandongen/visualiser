@@ -119,7 +119,7 @@ const initialState = {
   nodes: generateNodes(5, 5, 10),
   adjList: generateAdjList(generateDiamondAdj(5, 5), false),
   directed: false,
-  weighted: false,
+  weighted: true,
   reset: 0,
   timer: null,
   visCompleted: false
