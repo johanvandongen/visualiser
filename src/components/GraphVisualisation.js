@@ -78,7 +78,7 @@ const generateAdjList = (adj, directed, connectness=100) => {
 
   // Add attributes to each edge (weight, color, etc..)
   for (const node1 in adj) {
-    adj[node1] = adj[node1].map(val => ({node: val, weight: 1, color: STARTCOLOR}))
+    adj[node1] = adj[node1].map(val => ({node: val, weight: randomValue(1,10), color: STARTCOLOR}))
   }
 
   return adj
@@ -119,6 +119,7 @@ const initialState = {
   nodes: generateNodes(5, 5, 10),
   adjList: generateAdjList(generateDiamondAdj(5, 5), false),
   directed: false,
+  weighted: false,
   reset: 0,
   timer: null,
   visCompleted: false

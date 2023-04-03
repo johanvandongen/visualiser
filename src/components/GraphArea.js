@@ -66,7 +66,9 @@ export default function GraphVisualisation(props) {
                   id: uniqueEdgeKey,
                   node1: node1 - 1, // ajdlist uses starts with node 1, while list uses 0 at start
                   node2: node2 - 1,
-                  color: edge.color
+                  color: edge.color,
+                  weight: edge.weight,
+                  weighted: props.network.weighted
                 }
               )
               edges2.add(uniqueEdgeKey)
@@ -93,6 +95,8 @@ export default function GraphVisualisation(props) {
               node1={nodes[edge.node1]} 
               node2={nodes[edge.node2]}
               color={edge.color}
+              weight={edge.weight}
+              weighted={edge.weighted}
               />
             ))}
 
