@@ -3,7 +3,7 @@ import { GraphAlgorithm } from "./GraphAlgorithm"
 export class BFS extends GraphAlgorithm {
 
     * stepGenerator(start, end, adjList, nodes) {
-        const adjListCopy = structuredClone(adjList)
+        let adjListCopy = structuredClone(adjList)
         const nodesCopy = structuredClone(nodes)
 
         let visited = [start]
@@ -18,7 +18,8 @@ export class BFS extends GraphAlgorithm {
 
                 if (!visited.includes(v.node)) {
                     
-                    v.color = "orange"
+                    // v.color = "orange"
+                    adjListCopy = this.colorEdge(v.node, node, "orange", adjListCopy)
                     yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
 
                     visited.push(v.node)
@@ -26,7 +27,8 @@ export class BFS extends GraphAlgorithm {
                     yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
 
                     // Change color to gray after edge is used
-                    v.color = "gray"
+                    adjListCopy = this.colorEdge(v.node, node, "gray", adjListCopy)
+                    // v.color = "gray"
                     yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
                 }
 

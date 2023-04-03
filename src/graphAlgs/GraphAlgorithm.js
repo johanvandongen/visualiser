@@ -14,6 +14,20 @@ export class GraphAlgorithm {
         }
         return result
       }
+
+      colorEdge(n1, n2, color, adj) {
+        for (const node of adj[n1]) {
+          if (node.node === n2) {
+            node.color = color;
+          }
+        }
+        for (const node of adj[n2]) {
+          if (node.node === n1) {
+            node.color = color;
+          }
+        }
+        return adj;
+      }
     
       get_graph_steps() {
         throw new Error("Method 'get_graph_steps()' must be implemented.");
