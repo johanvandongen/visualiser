@@ -13,11 +13,12 @@ export default function GraphVisualisation(props) {
             strokeWidth = {3}
         />
         {props.weighted && <Text
+        type={"weightText"}
         fill="red"
-        x={(props.node1.x + props.node2.x) / 2 - 150}
-        y={(props.node1.y + props.node2.y) / 2 - 150}
-        width={300}
-        height={300}
+        x={(props.node1.x + props.node2.x) / 2 - 10}
+        y={(props.node1.y + props.node2.y) / 2 - 10}
+        width={20}
+        height={20}
         align="center"
         verticalAlign="middle"
         fontSize={16}

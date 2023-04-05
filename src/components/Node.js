@@ -21,6 +21,7 @@ export default function GraphVisualisation(props) {
           shadowOpacity={0.6}
         />
         <Text
+          type={"nodeText"}
           id={"CircleText" + props.node.id}
           key={"CircleText" + props.node.id}
           fontSize={props.nodeSize}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Stage, Layer } from 'react-konva';
 import Edge from './Edge'
 import Node from './Node'
@@ -84,8 +84,28 @@ export default function GraphVisualisation(props) {
     })
   }, [props])
 
+  const keyRef = useRef();
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      keyRef.current = event.key
+    };
+
+    const handleKeyUp = (event) => {
+      keyRef.current = "none"
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
     return (
-        <Stage width={props.width} height={props.height}>
+        <Stage type={"stage"} width={props.width} height={props.height} onclick={(e) => props.add(e, keyRef.current)}>
           <Layer>
             
             {edges.map((edge) => (

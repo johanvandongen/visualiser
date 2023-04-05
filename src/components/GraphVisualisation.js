@@ -129,7 +129,7 @@ const reducer = (state, action) => {
   switch(action.type) {
     case 'addVertex':
       return {...state,
-        nodes: [...state.nodes, action.v],
+        nodes: [...state.nodes, {node: action.v, color:"red", x:action.pos.x/action.w*100, y:action.pos.y/action.h*100}],
         adjList: {...state.adjList, [action.v]: []}
       }
     case 'addEdge':
@@ -284,11 +284,38 @@ export default function GraphVisualisation() {
     }
   }, [demoRef]);
 
+  const addNode = (e, key) => {
+    let pos;
+    let type = e.target.attrs.type 
+    if (type === "stage") {
+      pos = e.target.getRelativePointerPosition()
+    } else if (type === "weightText") {
+      pos = e.target.position()
+    } else if (type === "nodeText") {
+      let reletiveTextPos = e.target.getRelativePointerPosition()
+      let textDim = e.target.position()
+      let nodePos = e.target.parent.position()
+      pos = {
+        x:nodePos.x + reletiveTextPos.x + textDim.x,
+        y:nodePos.y + reletiveTextPos.y + textDim.y
+      }
+    } else {
+      pos = {x:10,y:10}
+      console.warn("position could not be determined properly")
+    }
+
+    if (key === "a") {
+      dispatchNetworkGraph({type: 'addVertex', v:5, pos: pos, w:width, h:height})
+      dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true}) 
+    }
+  }
+
   return (
     <div style={{display: "flex"}}>
       
       <div ref={demoRef} style={visStyle}>
-        <GraphArea width={width} height={height} network={networkGraph} updateNodes={updateNodes}/>
+        <GraphArea width={width} height={height} network={networkGraph} updateNodes={updateNodes} 
+        add={addNode}/>
       </div>
       
       <div style={sideMenuStyle}>
