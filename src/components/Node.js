@@ -1,5 +1,6 @@
 import React from "react";
 import { Text, Circle, Group } from 'react-konva';
+import { COLORS } from "../colors";
 
 export default function GraphVisualisation(props) {
 
@@ -27,7 +28,7 @@ export default function GraphVisualisation(props) {
           key={"CircleText" + props.node.id}
           fontSize={props.nodeSize}
           text={props.index+1}
-          fill={props.node.color === "black" ? "white" : "black"}
+          fill={props.node.color === COLORS.softBlack1 ? "white" : "black"}
           x={- props.nodeSize}
           y={- props.nodeSize}
           width={2*props.nodeSize}

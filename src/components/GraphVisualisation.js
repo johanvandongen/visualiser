@@ -121,7 +121,7 @@ const initialState = {
   start: 1,
   end: null,
   directed: false,
-  weighted: true,
+  weighted: false,
   reset: 0,
   timer: null,
   visCompleted: false

@@ -1,3 +1,4 @@
+import { COLORS } from "../colors";
 import { GraphAlgorithm } from "./GraphAlgorithm"
 
 export class DFS extends GraphAlgorithm {
@@ -42,14 +43,14 @@ export class DFS extends GraphAlgorithm {
 
             if (v.node === end) {
                 this.found = true
-                adj = this.colorEdge(v.node, node, "orange", adj);
+                adj = this.colorEdge(v.node, node, this.currentColor, adj);
                 yield {adj: adj, nodes: this.color(start, visited, end, nodes)}
                 return;
             }
 
             if (!visited.includes(v.node)) {
                 // v.color = "orange"
-                adj = this.colorEdge(v.node, node, "orange", adj);
+                adj = this.colorEdge(v.node, node, this.currentColor, adj);
                 yield {adj: adj, nodes: this.color(start, visited, node, nodes)}
                 
                 yield * this.dfs(start, v.node, end, visited, adj, nodes)
@@ -69,11 +70,11 @@ export class DFS extends GraphAlgorithm {
     color(start, visited, current, nodes) {
         for (let i = 0; i < nodes.length; i++) {
             if (i+1 === start){
-                nodes[i].color = "green"
+                nodes[i].color = COLORS.visHighlight2
             } else if (i+1 === current) {
-                nodes[i].color = "orange"
+                nodes[i].color = this.currentColor
             } else if (visited.includes(i+1) ) {
-                nodes[i].color = "gray"
+                nodes[i].color = COLORS.gray
             }
         }
         return nodes

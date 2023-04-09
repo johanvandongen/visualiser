@@ -1,4 +1,9 @@
+import { COLORS } from "../colors";
+
 export class GraphAlgorithm {
+
+  currentColor = COLORS.color4
+  
     constructor() {
         if (this.constructor === GraphAlgorithm) {
           throw new Error("Abstract classes can't be instantiated.");

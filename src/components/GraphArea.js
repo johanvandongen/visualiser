@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Stage, Layer, Circle } from 'react-konva';
 import Edge from './Edge'
 import Node from './Node'
+import { COLORS } from "../colors";
 
 export default function GraphVisualisation(props) {
   console.log("graphh rerendered")
@@ -32,7 +33,7 @@ export default function GraphVisualisation(props) {
           {...node, 
             isDragging: false, 
             id: "node" + index,
-            color: props.network.start === index+1 ? "green" :  props.network.end === index+1 ? "red" : node.color, 
+            color: props.network.start === index+1 ? COLORS.visHighlight2 :  props.network.end === index+1 ? COLORS.visHighlight1 : node.color, 
             x: node.x / 100 * props.width, // Scale to fit whole canvas
             y: node.y / 100 * props.height,
           }))
