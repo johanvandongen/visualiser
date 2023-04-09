@@ -118,6 +118,8 @@ const generateNodes = (w, h, margin) => {
 const initialState = {
   nodes: generateNodes(5, 5, 10),
   adjList: generateAdjList(generateDiamondAdj(5, 5), false),
+  start: 1,
+  end: null,
   directed: false,
   weighted: true,
   reset: 0,
@@ -129,14 +131,24 @@ const reducer = (state, action) => {
   switch(action.type) {
     case 'addVertex':
       return {...state,
-        nodes: [...state.nodes, {node: action.v, color:"red", x:action.pos.x/action.w*100, y:action.pos.y/action.h*100}],
+        nodes: [...state.nodes, {node: action.v, color:"white", x:action.pos.x/action.w*100, y:action.pos.y/action.h*100, id:'node'+state.nodes.length}],
         adjList: {...state.adjList, [action.v]: []}
       }
     case 'addEdge':
-      console.log("inputs: ", action.v, action.w)
-      // Not correct atm
       let adjV = state.adjList.hasOwnProperty(action.v) ? [...state.adjList[action.v]] : []
       let adjW = state.adjList.hasOwnProperty(action.w) ? [...state.adjList[action.w]] : []
+
+      for (const node2 of adjV) {
+        if (node2.node === action.w) {
+          return {...state}
+        }
+      }
+
+      for (const node2 of adjW) {
+        if (node2.node === action.v) {
+          return {...state}
+        }
+      }
 
       if (!adjV.includes(action.w)) {
         adjV.push({node: action.w, weight: 1, color:'black'})
@@ -154,6 +166,18 @@ const reducer = (state, action) => {
       };
     case 'update':
       return {...state, adjList: action.adj, nodes: state.nodes.map((node, i) => ({...node, color: action.nodes[i].color}))}
+    case 'setStart':
+      if (action.start === state.end) {
+        console.warn("Cant set the end to the same node as the starting node")
+        return {...state}
+      }
+      return {...state, start: action.start, reset: (state.reset + 1) % 2}
+    case 'setEnd':
+      if (action.end === state.start) {
+        console.warn("Cant set the end to the same node as the starting node")
+        return {...state}
+      }
+      return {...state, end: action.end, reset: (state.reset + 1) % 2}
     case 'setNewGraph':
       return {...state, adjList: action.adj, nodes: action.nodes}
     case 'updateNodes':
@@ -241,7 +265,7 @@ export default function GraphVisualisation() {
       } else if (alg === ALG.DFS) {
         traverser = new DFS();
       }
-      return traverser.stepGenerator(1, 1, adjMatrix, nodes)
+      return traverser.stepGenerator(networkGraph.start, networkGraph.end, adjMatrix, nodes)
     }); 
   }
 
@@ -325,7 +349,9 @@ export default function GraphVisualisation() {
         addEdge={(v, w) => {
           dispatchNetworkGraph({type: 'addEdge', v:v, w:w})
           dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true}) 
-          }}/>
+          }}e
+        setStart={(start) => dispatchNetworkGraph({type: 'setStart', start:start})}
+        setEnd={(end) => dispatchNetworkGraph({type: 'setEnd', end:end})}/>
       </div>
       
       <div style={sideMenuStyle}>
@@ -333,7 +359,6 @@ export default function GraphVisualisation() {
           <GraphGenButtons generate={generateGraph} reset={resetNetwork}/>
           <PlayPause timer={networkGraph.timer} runVis={runVis} pause={pauseVisualisation}/>
           <AlgSelection algs={ALG} alg={alogrithm} switchAlg={switchAlgorithm}/>
-          {/* <button onClick={addEdge}>Add Edge</button> */}
         </SideMenuGeneric>
       </div>
     </div>

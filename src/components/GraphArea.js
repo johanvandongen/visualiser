@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Stage, Layer } from 'react-konva';
+import { Stage, Layer, Circle } from 'react-konva';
 import Edge from './Edge'
 import Node from './Node'
 
@@ -22,20 +22,6 @@ export default function GraphVisualisation(props) {
       console.log(this)
     }
     props.updateNodes(id, pos)
-    // setNodes((prev) => {
-    //   if (prev != null && prev.length > 0) {
-    //     let nodesCopy = JSON.parse(JSON.stringify(prev))
-    //     for (let i = 0; i< nodesCopy.length; i++) {
-          
-    //       if (nodesCopy[i].id === id) {
-    //         nodesCopy[i] = {...nodesCopy[i], ...pos}
-    //       }
-    //     }
-    //     return nodesCopy
-    //   } else {
-    //     return prev
-    //   }
-    // })
   }
 
   // Load in graph network from props
@@ -46,6 +32,7 @@ export default function GraphVisualisation(props) {
           {...node, 
             isDragging: false, 
             id: "node" + index,
+            color: props.network.start === index+1 ? "green" :  props.network.end === index+1 ? "red" : node.color, 
             x: node.x / 100 * props.width, // Scale to fit whole canvas
             y: node.y / 100 * props.height,
           }))
@@ -134,7 +121,13 @@ export default function GraphVisualisation(props) {
       props.add(e, key)
     } else if (key === "Shift") {
       handleShiftClick(e)
-    } else {
+    } else if (key === "s") {
+      e.target.attrs.type === "nodeText" && props.setStart(e.target.parent.attrs.nodeNumber+1)
+    } else if (key === "e") {
+      e.target.attrs.type === "nodeText" && props.setEnd(e.target.parent.attrs.nodeNumber+1)
+    } else if (key === "r") {
+      props.setEnd(null)
+    }else {
       console.log(key)
     }
   }
@@ -166,15 +159,16 @@ export default function GraphVisualisation(props) {
               />
             ))}
 
-            {newEdge.node1 !== null && <Edge
+            {newEdge.node1 !== null && 
+            <Circle
               key={"newedge"} 
               id={"newedge"} 
-              node1={newEdge.node1} 
-              node2={newEdge.node1}
-              color={"green"}
-              weight={1}
-              weighted={true}
-              />}
+              stroke={"green"}
+              radius={nodeSize}
+              x={newEdge.node1.x}
+              y={newEdge.node1.y}
+            />
+              }
           </Layer>
         </Stage>
     )
