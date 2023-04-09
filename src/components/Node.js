@@ -10,6 +10,7 @@ export default function GraphVisualisation(props) {
         key={props.node.id}
         x={props.node.x}
         y={props.node.y}
+        nodeNumber={props.index}
         draggable
         onDragMove={props.handleDrag}>
         <Circle

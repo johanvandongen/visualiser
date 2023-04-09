@@ -8,13 +8,19 @@ export default function GraphVisualisation(props) {
 
   const [nodes, setNodes] = useState([])
   const [edges, setEdges] = useState([])
+  const [newEdge, setNewEdge] = useState({node1: null, node2: null})
   const [nodeSize, setNodeSize] = useState(30)
 
   // When nodes get dragged update their position in react state 
   // (needed to update edge positions)
-  const handleDrag = (e) => {
+  const handleDrag = (e, key) => {
+    console.log(key)
     const id =e.target.id()
     const pos = e.target.position()
+    if (key === "Shift") {
+      console.log(e.target)
+      console.log(this)
+    }
     props.updateNodes(id, pos)
     // setNodes((prev) => {
     //   if (prev != null && prev.length > 0) {
@@ -104,8 +110,37 @@ export default function GraphVisualisation(props) {
     };
   }, []);
 
+  const handleShiftClick = (e) => {
+    let pos = e.target.parent.position()
+    let node = e.target.parent.attrs.nodeNumber
+    if (newEdge.node1 !== null) {
+      props.addEdge(newEdge.nn1+1, node+1)
+    }
+    setNewEdge((prev) => {
+      if (e.target.attrs.type === "nodeText") {
+        if (prev.node1 === null) {
+          return {...prev, node1: nodes[node], nn1: node }
+        } else {
+          return {node1: null, node2: null}
+        }
+      } else {
+        return {...prev}
+      }
+    })
+  }
+
+  const handleClick = (e, key) => {
+    if (key === "a") {
+      props.add(e, key)
+    } else if (key === "Shift") {
+      handleShiftClick(e)
+    } else {
+      console.log(key)
+    }
+  }
+
     return (
-        <Stage type={"stage"} width={props.width} height={props.height} onclick={(e) => props.add(e, keyRef.current)}>
+        <Stage type={"stage"} width={props.width} height={props.height} onclick={(e) => handleClick(e, keyRef.current)}>
           <Layer>
             
             {edges.map((edge) => (
@@ -126,10 +161,20 @@ export default function GraphVisualisation(props) {
                 id={"Node" + index}
                 node={node}
                 nodeSize={nodeSize}
-                handleDrag={handleDrag}
+                handleDrag={(e) => handleDrag(e, keyRef.current)}
                 index={index}
               />
             ))}
+
+            {newEdge.node1 !== null && <Edge
+              key={"newedge"} 
+              id={"newedge"} 
+              node1={newEdge.node1} 
+              node2={newEdge.node1}
+              color={"green"}
+              weight={1}
+              weighted={true}
+              />}
           </Layer>
         </Stage>
     )

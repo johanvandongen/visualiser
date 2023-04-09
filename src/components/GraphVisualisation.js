@@ -133,16 +133,17 @@ const reducer = (state, action) => {
         adjList: {...state.adjList, [action.v]: []}
       }
     case 'addEdge':
+      console.log("inputs: ", action.v, action.w)
       // Not correct atm
       let adjV = state.adjList.hasOwnProperty(action.v) ? [...state.adjList[action.v]] : []
       let adjW = state.adjList.hasOwnProperty(action.w) ? [...state.adjList[action.w]] : []
 
       if (!adjV.includes(action.w)) {
-        adjV.push(action.w)
+        adjV.push({node: action.w, weight: 1, color:'black'})
       }
 
       if (!adjW.includes(action.v)) {
-        adjW.push(action.v)
+        adjW.push({node: action.v, weight: 1, color:'black'})
       }
 
       // Bracket notation 
@@ -284,6 +285,11 @@ export default function GraphVisualisation() {
     }
   }, [demoRef]);
 
+  // const addEdge = () => {
+  //   console.log("here")
+  //   dispatchNetworkGraph({type: 'addEdge', v:5, w:6})
+  // }
+
   const addNode = (e, key) => {
     let pos;
     let type = e.target.attrs.type 
@@ -315,7 +321,11 @@ export default function GraphVisualisation() {
       
       <div ref={demoRef} style={visStyle}>
         <GraphArea width={width} height={height} network={networkGraph} updateNodes={updateNodes} 
-        add={addNode}/>
+        add={addNode}
+        addEdge={(v, w) => {
+          dispatchNetworkGraph({type: 'addEdge', v:v, w:w})
+          dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true}) 
+          }}/>
       </div>
       
       <div style={sideMenuStyle}>
@@ -323,6 +333,7 @@ export default function GraphVisualisation() {
           <GraphGenButtons generate={generateGraph} reset={resetNetwork}/>
           <PlayPause timer={networkGraph.timer} runVis={runVis} pause={pauseVisualisation}/>
           <AlgSelection algs={ALG} alg={alogrithm} switchAlg={switchAlgorithm}/>
+          {/* <button onClick={addEdge}>Add Edge</button> */}
         </SideMenuGeneric>
       </div>
     </div>
