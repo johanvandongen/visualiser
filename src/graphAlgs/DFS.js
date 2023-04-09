@@ -20,6 +20,8 @@ export class DFS extends GraphAlgorithm {
         
     }
 
+    found = false;
+
     stepGenerator(start, end, adjList, nodes) {
         const adjListCopy = structuredClone(adjList)
         const nodesCopy = structuredClone(nodes)
@@ -33,6 +35,18 @@ export class DFS extends GraphAlgorithm {
         yield {adj: adj, nodes: this.color(start, visited, node, nodes)}
 
         for (const v of adj[node]) {
+
+            if (this.found) {
+                return;
+            }
+
+            if (v.node === end) {
+                this.found = true
+                adj = this.colorEdge(v.node, node, "orange", adj);
+                yield {adj: adj, nodes: this.color(start, visited, end, nodes)}
+                return;
+            }
+
             if (!visited.includes(v.node)) {
                 // v.color = "orange"
                 adj = this.colorEdge(v.node, node, "orange", adj);

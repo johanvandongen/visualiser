@@ -118,6 +118,8 @@ const generateNodes = (w, h, margin) => {
 const initialState = {
   nodes: generateNodes(5, 5, 10),
   adjList: generateAdjList(generateDiamondAdj(5, 5), false),
+  start: 1,
+  end: null,
   directed: false,
   weighted: true,
   reset: 0,
@@ -129,20 +131,31 @@ const reducer = (state, action) => {
   switch(action.type) {
     case 'addVertex':
       return {...state,
-        nodes: [...state.nodes, action.v],
+        nodes: [...state.nodes, {node: action.v, color:"white", x:action.pos.x/action.w*100, y:action.pos.y/action.h*100, id:'node'+state.nodes.length}],
         adjList: {...state.adjList, [action.v]: []}
       }
     case 'addEdge':
-      // Not correct atm
       let adjV = state.adjList.hasOwnProperty(action.v) ? [...state.adjList[action.v]] : []
       let adjW = state.adjList.hasOwnProperty(action.w) ? [...state.adjList[action.w]] : []
 
+      for (const node2 of adjV) {
+        if (node2.node === action.w) {
+          return {...state}
+        }
+      }
+
+      for (const node2 of adjW) {
+        if (node2.node === action.v) {
+          return {...state}
+        }
+      }
+
       if (!adjV.includes(action.w)) {
-        adjV.push(action.w)
+        adjV.push({node: action.w, weight: 1, color:'black'})
       }
 
       if (!adjW.includes(action.v)) {
-        adjW.push(action.v)
+        adjW.push({node: action.v, weight: 1, color:'black'})
       }
 
       // Bracket notation 
@@ -153,6 +166,18 @@ const reducer = (state, action) => {
       };
     case 'update':
       return {...state, adjList: action.adj, nodes: state.nodes.map((node, i) => ({...node, color: action.nodes[i].color}))}
+    case 'setStart':
+      if (action.start === state.end) {
+        console.warn("Cant set the end to the same node as the starting node")
+        return {...state}
+      }
+      return {...state, start: action.start, reset: (state.reset + 1) % 2}
+    case 'setEnd':
+      if (action.end === state.start) {
+        console.warn("Cant set the end to the same node as the starting node")
+        return {...state}
+      }
+      return {...state, end: action.end, reset: (state.reset + 1) % 2}
     case 'setNewGraph':
       return {...state, adjList: action.adj, nodes: action.nodes}
     case 'updateNodes':
@@ -240,7 +265,7 @@ export default function GraphVisualisation() {
       } else if (alg === ALG.DFS) {
         traverser = new DFS();
       }
-      return traverser.stepGenerator(1, 1, adjMatrix, nodes)
+      return traverser.stepGenerator(networkGraph.start, networkGraph.end, adjMatrix, nodes)
     }); 
   }
 
@@ -284,11 +309,49 @@ export default function GraphVisualisation() {
     }
   }, [demoRef]);
 
+  // const addEdge = () => {
+  //   console.log("here")
+  //   dispatchNetworkGraph({type: 'addEdge', v:5, w:6})
+  // }
+
+  const addNode = (e, key) => {
+    let pos;
+    let type = e.target.attrs.type 
+    if (type === "stage") {
+      pos = e.target.getRelativePointerPosition()
+    } else if (type === "weightText") {
+      pos = e.target.position()
+    } else if (type === "nodeText") {
+      let reletiveTextPos = e.target.getRelativePointerPosition()
+      let textDim = e.target.position()
+      let nodePos = e.target.parent.position()
+      pos = {
+        x:nodePos.x + reletiveTextPos.x + textDim.x,
+        y:nodePos.y + reletiveTextPos.y + textDim.y
+      }
+    } else {
+      pos = {x:10,y:10}
+      console.warn("position could not be determined properly")
+    }
+
+    if (key === "a") {
+      dispatchNetworkGraph({type: 'addVertex', v:5, pos: pos, w:width, h:height})
+      dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true}) 
+    }
+  }
+
   return (
     <div style={{display: "flex"}}>
       
       <div ref={demoRef} style={visStyle}>
-        <GraphArea width={width} height={height} network={networkGraph} updateNodes={updateNodes}/>
+        <GraphArea width={width} height={height} network={networkGraph} updateNodes={updateNodes} 
+        add={addNode}
+        addEdge={(v, w) => {
+          dispatchNetworkGraph({type: 'addEdge', v:v, w:w})
+          dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true}) 
+          }}e
+        setStart={(start) => dispatchNetworkGraph({type: 'setStart', start:start})}
+        setEnd={(end) => dispatchNetworkGraph({type: 'setEnd', end:end})}/>
       </div>
       
       <div style={sideMenuStyle}>
