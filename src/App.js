@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import TopMenu from "./components/TopMenu";
-import { COLORS } from "./colors";
+import TopMenu from "./components/Menu/TopMenu";
+import { COLORS } from "./utils/colors";
 import SorterVisualisation from "./components/SorterVisualisation"
 import GraphVisualisation from "./components/GraphVisualisation"
 import HelloWorld from "./components/HelloWorld"

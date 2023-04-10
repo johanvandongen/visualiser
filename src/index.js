@@ -2,11 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-export { default as SideMenuGeneric } from "./components/SideMenuComp/SideMenuGeneric";
-export { default as  PlayPause } from "./components/SideMenuComp/PlayPause";
-export { default as AlgSelection } from "./components/SideMenuComp/AlgSelection";
-export { default as GraphGenButtons } from "./components/SideMenuComp/GraphGenButtons";
-export { default as SorterGenButtons } from "./components/SideMenuComp/SorterGenButtons";
+export { default as SideMenuGeneric } from "./components/Menu/SideMenuComp/SideMenuGeneric";
+export { default as  PlayPause } from "./components/Menu/SideMenuComp/PlayPause";
+export { default as AlgSelection } from "./components/Menu/SideMenuComp/AlgSelection";
+export { default as GraphGenButtons } from "./components/Menu/SideMenuComp/GraphGenButtons";
+export { default as SorterGenButtons } from "./components/Menu/SideMenuComp/SorterGenButtons";
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

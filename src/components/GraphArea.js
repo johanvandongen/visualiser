@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Stage, Layer, Circle } from 'react-konva';
 import Edge from './Edge'
 import Node from './Node'
-import { COLORS } from "../colors";
+import { COLORS } from "../utils/colors";
 
 export default function GraphVisualisation(props) {
   console.log("graphh rerendered")
@@ -117,9 +117,31 @@ export default function GraphVisualisation(props) {
     })
   }
 
+  const handleAClick = (e) => {
+    let pos;
+    let type = e.target.attrs.type 
+    if (type === "stage") {
+      pos = e.target.getRelativePointerPosition()
+    } else if (type === "weightText") {
+      pos = e.target.position()
+    } else if (type === "nodeText") {
+      let reletiveTextPos = e.target.getRelativePointerPosition()
+      let textDim = e.target.position()
+      let nodePos = e.target.parent.position()
+      pos = {
+        x:nodePos.x + reletiveTextPos.x + textDim.x,
+        y:nodePos.y + reletiveTextPos.y + textDim.y
+      }
+    } else {
+      console.warn("position could not be determined properly")
+      return
+    }
+    props.addNode(pos)
+  }
+
   const handleClick = (e, key) => {
     if (key === "a") {
-      props.add(e, key)
+      handleAClick(e)
     } else if (key === "Shift") {
       handleShiftClick(e)
     } else if (key === "s") {

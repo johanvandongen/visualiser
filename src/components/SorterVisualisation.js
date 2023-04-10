@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import SortBars from "./SortBars";
 import { v4 as uuidv4 } from 'uuid';
-import { COLORS } from "../colors";
-import { randomValue } from "../helpers"
-import { InsertionSort } from "../sortingAlgs/InsertionSort";
-import { BubbleSort } from "../sortingAlgs/BubbleSort";
-import { InPlaceMergeSort } from "../sortingAlgs/InPlaceMergeSort";
+import { COLORS } from "../utils/colors";
+import { randomValue } from "../utils/helpers"
+import { InsertionSort } from "../algorithms/sortingAlgs/InsertionSort";
+import { BubbleSort } from "../algorithms/sortingAlgs/BubbleSort";
+import { InPlaceMergeSort } from "../algorithms/sortingAlgs/InPlaceMergeSort";
 import { visStyle, sideMenuStyle } from "../App";
 import {SideMenuGeneric, PlayPause, AlgSelection, SorterGenButtons} from "../index.js"
 

@@ -1,118 +1,14 @@
 import React, { useEffect, useReducer, useRef, useState } from "react";
-import {COLORS} from '../colors.js'
 import GraphArea from "./GraphArea"
 import { visStyle, sideMenuStyle } from "../App.js";
-import { BFS } from '../graphAlgs/BFS'
-import { DFS } from '../graphAlgs/DFS'
-import { randomValue, shuffleArray, inBound } from '../helpers.js'
+import { BFS } from '../algorithms/graphAlgs/BFS'
+import { DFS } from '../algorithms/graphAlgs/DFS'
 import {SideMenuGeneric, PlayPause, AlgSelection, GraphGenButtons} from "../index.js"
+import { generateAdjList, generateDiamondAdj, generateNodes } from "../utils/GenerateGraph.js";
 
 export const ALG = {
   BFS: 'bfs',
   DFS: 'dfs',
-}
-
-/**
- * @param {number} w width
- * @param {number} h height
- * @returns adjacency list object, where nodes nearby each other in diamond like graph are connected
- */
-const generateDiamondAdj = (w, h) => {
-  let nrOfNodes = w*h + (w-1)*(h-1);
-  let adj = {}
-  let toggle = 0;
-  let count = 1
-
-  for (let row=0; row<h*2-1; row++) {
-    for(let col=0; col<w-toggle; col++) {
-
-      if (col===0 && toggle===0) { // Left col
-        adj[count] = inBound([count-((w-1)*2+1), count-w+1, count+w, count+(w-1)*2+1], 1, nrOfNodes)
-      } else if (col===w-toggle-1 && toggle===0) { // Right col
-        adj[count] = inBound([count-((w-1)*2+1), count+w-1, count-w, count+(w-1)*2+1], 1, nrOfNodes)
-      } else if (row===0 || row===h*2-1-1) { // top and bottom row
-        if (!adj.hasOwnProperty(count)) {
-          adj[count] = inBound([count-1, count+1], 1, nrOfNodes)
-        } else {
-          adj[count].push(...inBound([count-1, count+1], 1, nrOfNodes))
-        }
-      } else {
-        adj[count] = inBound([count-w, count-w+1, count+w, count+w-1, count+w+(w-1), count-(w+(w-1))], 1, nrOfNodes)
-      }
-
-      count += 1
-    }
-    toggle = (toggle+1) % 2;
-  }
-  return adj
-}
-
-/**
- * Uses generateDiamondAdj(w, h) for adjacency generation and then selects random edges
- * to make graph sparser and add weight/color attributes.
- * @param {{number: number[]}} adj adjacency list
- * @param {boolean} directed whether the graph is directed/undirected
- * @param {number} connectness tbd
- * @returns adjacency list
- */
-const generateAdjList = (adj, directed, connectness=100) => {
-  const STARTCOLOR = "black"
-
-  // Select random edges
-  if (connectness!==100) {
-    for(const node1 in adj) {
-        adj[node1] = shuffleArray(adj[node1]).slice(0, randomValue(0, adj[node1].length))
-    }
-  }
-
-  // Make sure adjacency list is correct u: [v, ..] means also v: [u, ..]
-  if (!directed) {
-    for(const node1 in adj) {
-      for (const node2 of adj[node1]) {
-        if (!adj[node2].includes(+node1)) {
-          adj[node2].push(+node1)
-        }
-      }
-    }
-  }
-
-  // Add attributes to each edge (weight, color, etc..)
-  for (const node1 in adj) {
-    adj[node1] = adj[node1].map(val => ({node: val, weight: randomValue(1,10), color: STARTCOLOR}))
-  }
-
-  return adj
-}
-
-/**
- * @param {number} w number of nodes in a row (alternating between w and w-1)
- * @param {number} h number of rows of full width, so additional of h-1 rows of w-1 width
- * @param {number} margin margin for position of nodes w.r.t graph area boundaries
- * @returns list of nodes
- */
-const generateNodes = (w, h, margin) => {
-  let nodes = [];
-  let xStep = (100 - margin*2) / (w-1);
-  let yStep = (100 - margin*2) / (h*2-1-1);
-  let t = xStep / 2;
-  let x = margin;
-  let y = margin;
-  let toggle = 0;
-  let count = 0;
-
-  // Creates nodes in diamond like pattern
-  for (let row=0; row<h*2-1; row++) {
-    for(let col=0; col<w-toggle; col++) {
-      nodes.push({x:x, y:y, color:"white", id:'node'+count})
-      x += xStep
-      count += 1
-    }
-    y += yStep
-    x = toggle === 1 ? margin : margin+t;
-    toggle = (toggle+1) % 2;
-  }
-
-  return nodes
 }
 
 const initialState = {
@@ -212,12 +108,6 @@ export default function GraphVisualisation() {
   const [alogrithm, setAlgorithm] = useState(ALG.BFS)
   const timerIdRef = useRef();
 
-  const updateNodes = (id, pos) => {
-    console.log("updated nodes: ", id, pos)
-    dispatchNetworkGraph({type:'updateNodes', pos: pos, id:id, w:width, h:height})
-
-  }
-
   // Sorts one step
   const runVisStep = () => {
     let nextStep = steps.next()
@@ -309,47 +199,20 @@ export default function GraphVisualisation() {
     }
   }, [demoRef]);
 
-  // const addEdge = () => {
-  //   console.log("here")
-  //   dispatchNetworkGraph({type: 'addEdge', v:5, w:6})
-  // }
-
-  const addNode = (e, key) => {
-    let pos;
-    let type = e.target.attrs.type 
-    if (type === "stage") {
-      pos = e.target.getRelativePointerPosition()
-    } else if (type === "weightText") {
-      pos = e.target.position()
-    } else if (type === "nodeText") {
-      let reletiveTextPos = e.target.getRelativePointerPosition()
-      let textDim = e.target.position()
-      let nodePos = e.target.parent.position()
-      pos = {
-        x:nodePos.x + reletiveTextPos.x + textDim.x,
-        y:nodePos.y + reletiveTextPos.y + textDim.y
-      }
-    } else {
-      pos = {x:10,y:10}
-      console.warn("position could not be determined properly")
-    }
-
-    if (key === "a") {
-      dispatchNetworkGraph({type: 'addVertex', v:5, pos: pos, w:width, h:height})
-      dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true}) 
-    }
-  }
-
   return (
     <div style={{display: "flex"}}>
       
       <div ref={demoRef} style={visStyle}>
-        <GraphArea width={width} height={height} network={networkGraph} updateNodes={updateNodes} 
-        add={addNode}
+        <GraphArea width={width} height={height} network={networkGraph} 
+        updateNodes={(id, pos) => dispatchNetworkGraph({type:'updateNodes', pos: pos, id:id, w:width, h:height})} 
+        addNode={(pos) => {
+          dispatchNetworkGraph({type: 'addVertex', v:5, pos: pos, w:width, h:height})
+          dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true}) 
+        }}
         addEdge={(v, w) => {
           dispatchNetworkGraph({type: 'addEdge', v:v, w:w})
           dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true}) 
-          }}e
+          }}
         setStart={(start) => dispatchNetworkGraph({type: 'setStart', start:start})}
         setEnd={(end) => dispatchNetworkGraph({type: 'setEnd', end:end})}/>
       </div>

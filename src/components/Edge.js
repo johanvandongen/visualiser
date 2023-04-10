@@ -1,6 +1,6 @@
 import React from "react";
 import { Line, Text } from 'react-konva';
-import { COLORS } from "../colors";
+import { COLORS } from "../utils/colors";
 
 export default function GraphVisualisation(props) {
 

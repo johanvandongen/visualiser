@@ -1,4 +1,4 @@
-import { COLORS } from "../colors";
+import { COLORS } from "../../utils/colors";
 import { GraphAlgorithm } from "./GraphAlgorithm"
 
 export class DFS extends GraphAlgorithm {

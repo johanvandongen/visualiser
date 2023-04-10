@@ -1,6 +1,6 @@
 import React from "react";
-import { COLORS } from "../colors"
-import '../index.css'
+import { COLORS } from "../../utils/colors"
+import '../../index.css'
 
 export default function TopMenu(props) {
 
