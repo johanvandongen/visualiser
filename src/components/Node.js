@@ -1,5 +1,6 @@
 import React from "react";
 import { Text, Circle, Group } from 'react-konva';
+import { COLORS } from "../colors";
 
 export default function GraphVisualisation(props) {
 
@@ -10,6 +11,7 @@ export default function GraphVisualisation(props) {
         key={props.node.id}
         x={props.node.x}
         y={props.node.y}
+        nodeNumber={props.index}
         draggable
         onDragMove={props.handleDrag}>
         <Circle
@@ -21,11 +23,12 @@ export default function GraphVisualisation(props) {
           shadowOpacity={0.6}
         />
         <Text
+          type={"nodeText"}
           id={"CircleText" + props.node.id}
           key={"CircleText" + props.node.id}
           fontSize={props.nodeSize}
           text={props.index+1}
-          fill={props.node.color === "black" ? "white" : "black"}
+          fill={props.node.color === COLORS.softBlack1 ? "white" : "black"}
           x={- props.nodeSize}
           y={- props.nodeSize}
           width={2*props.nodeSize}

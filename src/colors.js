@@ -6,4 +6,6 @@ export const COLORS = {
     color5: "#993955",
     visHighlight1: "#FF6464", // Red-ish
     visHighlight2: "#7FB77E", // Green-ish
+    softBlack1: "#20262E",
+    gray: "#bbbbbb",
 }

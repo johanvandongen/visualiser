@@ -1,9 +1,11 @@
+import { COLORS } from "../colors"
 import { GraphAlgorithm } from "./GraphAlgorithm"
 
 export class BFS extends GraphAlgorithm {
 
     * stepGenerator(start, end, adjList, nodes) {
-        const adjListCopy = structuredClone(adjList)
+        console.log(start, end)
+        let adjListCopy = structuredClone(adjList)
         const nodesCopy = structuredClone(nodes)
 
         let visited = [start]
@@ -16,9 +18,15 @@ export class BFS extends GraphAlgorithm {
 
             for (const v of adjListCopy[node]) {
 
+                if (v.node === end) {
+                    yield {adj: adjListCopy, nodes: this.color(start, visited, q, end, nodesCopy)}
+                    return;
+                }
+
                 if (!visited.includes(v.node)) {
                     
-                    v.color = "orange"
+                    // v.color = "orange"
+                    adjListCopy = this.colorEdge(v.node, node, this.currentColor, adjListCopy)
                     yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
 
                     visited.push(v.node)
@@ -26,8 +34,9 @@ export class BFS extends GraphAlgorithm {
                     yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
 
                     // Change color to gray after edge is used
-                    v.color = "gray"
-                    yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
+                    // adjListCopy = this.colorEdge(v.node, node, COLORS.gray, adjListCopy)
+                    // v.color = "gray"
+                    // yield {adj: adjListCopy, nodes: this.color(start, visited, q, node, nodesCopy)}
                 }
 
                 
@@ -38,13 +47,13 @@ export class BFS extends GraphAlgorithm {
     color(start, visited, queue, current, nodes) {
         for (let i = 0; i < nodes.length; i++) {
             if (i+1 === start){
-                nodes[i].color = "green"
+                nodes[i].color = COLORS.visHighlight2
             } else if (i+1 === current) {
-                nodes[i].color = "orange"
+                nodes[i].color = this.currentColor
             } else if (visited.includes(i+1) && !queue.includes(i+1)) {
-                nodes[i].color = "gray"
+                nodes[i].color = COLORS.gray
             } else if (queue.includes(i+1)) {
-                nodes[i].color = "black"
+                nodes[i].color = COLORS.color5
             }
         }
         return nodes
