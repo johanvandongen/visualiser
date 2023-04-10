@@ -5,6 +5,7 @@ import { BFS } from '../algorithms/graphAlgs/BFS'
 import { DFS } from '../algorithms/graphAlgs/DFS'
 import {SideMenuGeneric, PlayPause, AlgSelection, GraphGenButtons} from "../index.js"
 import { generateAdjList, generateDiamondAdj, generateNodes } from "../utils/GenerateGraph.js";
+import { useWidthHeight } from "../hooks/useWidthHeight";
 
 export const ALG = {
   BFS: 'bfs',
@@ -99,9 +100,8 @@ const reducer = (state, action) => {
 }
 
 export default function GraphVisualisation() {
-  const [width, setWidth] = useState(100);
-  const [height, setHeight] = useState(100);
-  const demoRef = useRef();
+  const demoRef = useRef(null)
+  const [width, height] = useWidthHeight(demoRef);
 
   const [networkGraph, dispatchNetworkGraph] = useReducer(reducer, initialState);
   const [steps, setSteps] = useState()
@@ -186,18 +186,6 @@ export default function GraphVisualisation() {
     clearInterval(timerIdRef.current)
     dispatchNetworkGraph({type: 'reset'})
 }
-
-  // Handles canvas size to fit in the parent div
-  useEffect(() => {
-    const resizeObserver = new ResizeObserver((event) => {
-      setWidth(event[0].contentBoxSize[0].inlineSize);
-      setHeight(event[0].contentBoxSize[0].blockSize);
-    });
-
-    if (demoRef) {
-      resizeObserver.observe(demoRef.current);
-    }
-  }, [demoRef]);
 
   return (
     <div style={{display: "flex"}}>
