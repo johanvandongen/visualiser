@@ -4,7 +4,7 @@ import { visStyle, sideMenuStyle } from "../App.js";
 import { BFS } from '../algorithms/graphAlgs/BFS'
 import { DFS } from '../algorithms/graphAlgs/DFS'
 import {SideMenuGeneric, PlayPause, AlgSelection, GraphGenButtons} from "../index.js"
-import { generateAdjList, generateDiamondAdj, generateNodes } from "../utils/GenerateGraph.js";
+import { formatAdjList, generateDiamondAdj, generateNodes } from "../utils/GenerateGraph.js";
 import { useWidthHeight } from "../hooks/useWidthHeight";
 
 export const ALG = {
@@ -14,7 +14,7 @@ export const ALG = {
 
 const initialState = {
   nodes: generateNodes(5, 5, 10),
-  adjList: generateAdjList(generateDiamondAdj(5, 5), false),
+  adjList: formatAdjList(generateDiamondAdj(5, 5), false),
   start: 1,
   end: null,
   directed: false,
@@ -174,7 +174,7 @@ export default function GraphVisualisation() {
     let w = 4
     let h = 4
     let nodes = generateNodes(w, h, 5)
-    let adj = generateAdjList(generateDiamondAdj(w,h), false, 80)
+    let adj = formatAdjList(generateDiamondAdj(w,h), false, 80)
 
     dispatchNetworkGraph({type: 'setNewGraph', adj:adj, nodes:nodes})
     dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true})
