@@ -170,11 +170,11 @@ export default function GraphVisualisation() {
     dispatchNetworkGraph({type: 'reset'})
   }, [alogrithm])
 
-  const generateGraph = () => {
+  const generateGraph = (connectness, w, h) => {
     clearInterval(timerIdRef.current)
-    let w = 4
-    let h = 4
-    const networkGraph = GraphFactory("diamond", false, 80, w, h)
+    // let w = 4
+    // let h = 4
+    const networkGraph = GraphFactory("diamond", false, connectness, w, h)
 
     dispatchNetworkGraph({type: 'setNewGraph', adj:networkGraph[1], nodes:networkGraph[0]})
     dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true})
