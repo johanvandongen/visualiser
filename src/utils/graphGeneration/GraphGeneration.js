@@ -1,4 +1,4 @@
-import { shuffleArray, randomValue } from "../helpers";
+import { randomValue } from "../helpers";
 
 export class GraphGeneration {
   margin = 10; // margin for position of nodes w.r.t graph area boundaries
@@ -39,14 +39,23 @@ export class GraphGeneration {
   /**
    * Selects random edges
    * @param {*} adjacencyList 
-   * @param {*} connectness 
+   * @param {number} connectness 
    * @modifies adjacencyList
    */
   static selectEdges = (adjacencyList, connectness) => {
-    if (connectness!==100) {
       for(const node1 in adjacencyList) {
-        adjacencyList[node1] = shuffleArray(adjacencyList[node1]).slice(0, randomValue(0, adjacencyList[node1].length))
-      }
+
+        let oldValues = adjacencyList[node1]
+        let newValues = []
+
+        for (let i = 0; i < oldValues.length; i++) {
+          let randomNum = randomValue(0, 100)
+          if (randomNum <= connectness) {
+            newValues.push(oldValues[i])
+          }
+        }
+
+        adjacencyList[node1] = newValues
     }
     return adjacencyList
   }

@@ -7,12 +7,12 @@ export class DiamondGraph extends GraphGeneration {
     validateInput(w, h) {
         const invalidType = typeof w !== "number" || typeof h !== "number"
         const invalidWidth = w < 2 || w > 10
-        const invalidHeight = w < 2 || w > 10
+        const invalidHeight = h < 2 || h > 10
 
         if (invalidType || invalidWidth || invalidHeight) {
             throw Error(
                 `width and height should be a number between 2 and 10, 
-                got width = ${w}, height = ${h}`
+                got width = ${w}: ${typeof w}, height = ${h}: ${typeof h}`
             )
         }
     }
