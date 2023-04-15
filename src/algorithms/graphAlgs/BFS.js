@@ -19,6 +19,7 @@ export class BFS extends GraphAlgorithm {
             for (const v of adjListCopy[node]) {
 
                 if (v.node === end) {
+                    adjListCopy = this.colorEdge(v.node, node, this.currentColor, adjListCopy)
                     yield {adj: adjListCopy, nodes: this.color(start, visited, q, end, nodesCopy)}
                     return;
                 }
