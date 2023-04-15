@@ -170,10 +170,8 @@ export default function GraphVisualisation() {
     dispatchNetworkGraph({type: 'reset'})
   }, [alogrithm])
 
-  const generateGraph = (connectness, w, h) => {
+  const setNewGraph = (connectness, w, h) => {
     clearInterval(timerIdRef.current)
-    // let w = 4
-    // let h = 4
     const networkGraph = GraphFactory("diamond", false, connectness, w, h)
 
     dispatchNetworkGraph({type: 'setNewGraph', adj:networkGraph[1], nodes:networkGraph[0]})
@@ -207,7 +205,7 @@ export default function GraphVisualisation() {
       
       <div style={sideMenuStyle}>
         <SideMenuGeneric>
-          <GraphGenButtons generate={generateGraph} reset={resetNetwork}/>
+          <GraphGenButtons generate={setNewGraph} reset={resetNetwork}/>
           <PlayPause timer={networkGraph.timer} runVis={runVis} pause={pauseVisualisation}/>
           <AlgSelection algs={ALG} alg={alogrithm} switchAlg={switchAlgorithm}/>
         </SideMenuGeneric>

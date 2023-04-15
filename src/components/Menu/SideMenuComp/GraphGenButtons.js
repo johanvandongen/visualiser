@@ -4,7 +4,7 @@ import { rowStyle, columnStyle } from "./SideMenuGeneric";
 export default function GraphGenButtons(props) {
     const [width, setWidth] = useState(5)
     const [height, setheight] = useState(5)
-    const [connectness, setConnectness] = useState(100)
+    const [connectness, setConnectness] = useState(50)
 
     const handleWidthSlider = (event) => {
         setWidth(+event.target.value)
