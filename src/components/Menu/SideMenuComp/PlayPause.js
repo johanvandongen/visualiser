@@ -16,7 +16,7 @@ export default function SideMenu(props) {
 
     // Play / Pause button
     const playPause = () => {
-        if (props.timer !== null) {
+        if (props.isPlaying === true) {
             props.pause();
         } else {
             props.runVis(speed.milliSeconds)
@@ -24,7 +24,7 @@ export default function SideMenu(props) {
     }
 
     useEffect(() => {
-        if (props.timer !== null) {
+        if (props.isPlaying === true) {
             props.runVis(speed.milliSeconds)
         }
     }, [speed])
@@ -32,7 +32,7 @@ export default function SideMenu(props) {
     return (
         <>
             <div style={rowStyle}>
-                <button className="button" onClick={playPause}>{props.timer ? 'Pause' : 'Play!'}</button>
+                <button className="button" onClick={playPause}>{props.isPlaying ? 'Pause' : 'Play!'}</button>
             </div>
 
             <div style={columnStyle}>
