@@ -89,10 +89,7 @@ const reducer = (state, action) => {
         nodes: state.nodes.map((node) => ({...node, color: 'white'})),
         reset: (state.reset + 1) % 2}
     case 'triggerStartVis':
-      console.log("triggered")
-      return {...state, 
-        reset: (state.reset + 1) % 2, //dummy field triggers fresh step generator object
-      }
+      return {...state, reset: (state.reset + 1) % 2} // Dummy field triggers fresh step generator object
     default:
       return state
   }
@@ -105,7 +102,6 @@ export default function GraphVisualisation() {
   const [networkGraph, dispatchNetworkGraph] = useReducer(reducer, initialState);
   const [steps, setSteps] = useState()
   const [alogrithm, setAlgorithm] = useState(ALG.BFS)
-
   const [isPlaying, setIsPlaying] = useState({playing: false, finished: false, delay:203})
 
   usePlayPause(() => {
@@ -123,42 +119,9 @@ export default function GraphVisualisation() {
     setIsPlaying((prev) => {return {...prev, playing:true, delay: ms}})
   }
 
-  // Clear timer and update the state
   const pauseVisualisation = () => {
     setIsPlaying((prev) => {return {...prev, playing:false}})
   }
-
-  const switchAlgorithm = (event) => {
-    setIsPlaying((prev) => {return {...prev, playing:false, finished: false}}) 
-
-    setAlgorithm(event.target.value);
-    console.log("Switched to", event.target.value)
-  }
-
-  // Set new moves
-  const algorithmSelector = (alg, adjMatrix, nodes) => {
-    
-    setSteps((prev) => {
-      let traverser;
-      if (alg === ALG.BFS) {
-        traverser = new BFS();
-      } else if (alg === ALG.DFS) {
-        traverser = new DFS();
-      }
-      return traverser.stepGenerator(networkGraph.start, networkGraph.end, adjMatrix, nodes)
-    }); 
-  }
-
-  useEffect(() => { 
-    if (isPlaying.finished === false && isPlaying.playing === false) {
-      console.log("new gen obj")
-      algorithmSelector(alogrithm, networkGraph.adjList, networkGraph.nodes);
-    }
-  }, [alogrithm, networkGraph.reset])
-
-  useEffect(() => { 
-    dispatchNetworkGraph({type: 'reset'})
-  }, [alogrithm])
 
   const setNewGraph = (connectness, w, h) => {
     setIsPlaying((prev) => {return {...prev, playing:false, finished: false}})
@@ -168,12 +131,39 @@ export default function GraphVisualisation() {
     dispatchNetworkGraph({type: 'triggerStartVis'})
   }
 
-  // When the nodepositions are reset, no new moves are generated. But the old moves are still
-  // correct and we set the step to 0 so that it start correctly again
   const resetNetwork = () => {
     setIsPlaying((prev) => {return {...prev, playing:false, finished: false}})
     dispatchNetworkGraph({type: 'reset'})
-}
+  }
+
+  const switchAlgorithm = (event) => {
+    setIsPlaying((prev) => {return {...prev, playing:false, finished: false}}) 
+    setAlgorithm(event.target.value);
+    console.log(`Switched to: ${event.target.value}`)
+  }
+
+  // Set new moves
+  const algorithmSelector = (alg, adjList, nodes) => {
+    setSteps((prev) => {
+      let traverser;
+      if (alg === ALG.BFS) {
+        traverser = new BFS();
+      } else if (alg === ALG.DFS) {
+        traverser = new DFS();
+      }
+      return traverser.stepGenerator(networkGraph.start, networkGraph.end, adjList, nodes)
+    }); 
+  }
+
+  useEffect(() => { 
+    if (isPlaying.finished === false && isPlaying.playing === false) {
+      algorithmSelector(alogrithm, networkGraph.adjList, networkGraph.nodes);
+    }
+  }, [alogrithm, networkGraph.reset])
+
+  useEffect(() => { 
+    dispatchNetworkGraph({type: 'reset'})
+  }, [alogrithm])
 
   return (
     <div style={{display: "flex"}}>
