@@ -1,6 +1,7 @@
 import React from "react";
 import { COLORS } from "../../utils/colors"
 import '../../index.css'
+import Dropdown from "./Dropdown";
 
 export default function TopMenu(props) {
 
@@ -17,15 +18,11 @@ export default function TopMenu(props) {
     return (
         <div style={menuStyle}>
             <div style={{width: "40%"}}>
-                <h1>{props.types[props.currentType].name} Visualiser</h1>
+                <h1>{props.currentType} Visualiser</h1>
             </div>
 
             <div id="custom-select">
-                <select onChange={props.changeType} value={props.currentType}>
-                    <option value={0}>{props.types[0].name}</option>
-                    <option value={1}>{props.types[1].name}</option>
-                    <option value={2}>{props.types[2].name}</option>
-                </select>
+                <Dropdown options={props.types} current={props.currentType} onChange={props.changeType}/>
             </div>
         </div>
     )

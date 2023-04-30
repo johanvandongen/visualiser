@@ -5,11 +5,7 @@ export class SortingAlgorithm {
         }
       }
     
-      get_sort_array_steps() {
-        throw new Error("Method 'get_sort_array_steps()' must be implemented.");
-      }
-
-      get_sort_index_steps() {
-        throw new Error("Method 'get_sort_index_steps()' must be implemented.");
+      stepGenerator() {
+        throw new Error("Method 'stepGenerator()' must be implemented.");
       }
 }

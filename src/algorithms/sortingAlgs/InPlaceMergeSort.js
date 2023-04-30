@@ -25,7 +25,7 @@ export class InPlaceMergeSort extends SortingAlgorithm {
     // Merging the subarrays using shell sorting
     // Time Complexity: O(nlog n)
     // Space Complexity: O(1)
-    inPlaceMerge(nums,start,end) {
+    * inPlaceMerge(nums,start,end) {
         let gap = end - start + 1;
         gap = this.nextGap(gap)
         while (gap > 0) {
@@ -34,13 +34,14 @@ export class InPlaceMergeSort extends SortingAlgorithm {
                 let j = i + gap;
                 if (nums[i].val > nums[j].val) {
                     this.swap(nums, i, j);
+                    yield {array: nums, indices:[i, j]}
                 }
             }
             gap = this.nextGap(gap)
         }
     }
 
-    mergeSort(nums,s,e) {
+    * mergeSort(nums,s,e) {
         if (s === e){
             return;
         }
@@ -51,16 +52,21 @@ export class InPlaceMergeSort extends SortingAlgorithm {
     
         // Recursive calls to sort left
         // and right subarrays
-        this.mergeSort(nums, s, mid);
-        this.mergeSort(nums, mid + 1, e);
-        this.inPlaceMerge(nums, s, e);
+        yield * this.mergeSort(nums, s, mid);
+        yield * this.mergeSort(nums, mid + 1, e);
+        yield * this.inPlaceMerge(nums, s, e);
     }
     
-    get_sort_index_steps(values) {
+    getSortIndexSteps(values) {
         this.moves = [];
         let temp = structuredClone(values)
         this.mergeSort(temp, 0, temp.length - 1)
         console.log(this.moves)
         return this.moves;
+    }
+
+    * stepGenerator(values) {
+        let temp = structuredClone(values)
+        yield * this.mergeSort(temp, 0, temp.length - 1)
     }
 }

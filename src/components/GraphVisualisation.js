@@ -6,6 +6,7 @@ import { DFS } from '../algorithms/graphAlgs/DFS'
 import {SideMenuGeneric, PlayPause, AlgSelection, GraphGenButtons} from "../index.js"
 import { GraphFactory } from "../utils/graphGeneration/GraphFactory.js";
 import { useWidthHeight } from "../hooks/useWidthHeight";
+import { usePlayPause } from "../hooks/usePlayPause";
 
 export const ALG = {
   BFS: 'bfs',
@@ -21,16 +22,16 @@ const initialState = {
   directed: false,
   weighted: false,
   reset: 0,
-  timer: null,
-  visCompleted: false
 }
 
 const reducer = (state, action) => {
   switch(action.type) {
     case 'addVertex':
+      let newNodeNum = state.nodes.length
       return {...state,
-        nodes: [...state.nodes, {node: action.v, color:"white", x:action.pos.x/action.w*100, y:action.pos.y/action.h*100, id:'node'+state.nodes.length}],
-        adjList: {...state.adjList, [action.v]: []}
+        nodes: [...state.nodes, {node: newNodeNum, color:"white", x:action.pos.x/action.w*100, y:action.pos.y/action.h*100, id:'node'+newNodeNum}],
+        adjList: {...state.adjList, [newNodeNum]: []},
+        reset: (state.reset + 1) % 2
       }
     case 'addEdge':
       let adjV = state.adjList.hasOwnProperty(action.v) ? [...state.adjList[action.v]] : []
@@ -56,11 +57,10 @@ const reducer = (state, action) => {
         adjW.push({node: action.v, weight: 1, color:'black'})
       }
 
-      // Bracket notation 
-      // https://stackoverflow.com/questions/2241875/how-to-create-an-object-property-from-a-variable-value-in-javascript
       return {
         ...state,
-        adjList: {...state.adjList, [action.v]: adjV, [action.w]: adjW}
+        adjList: {...state.adjList, [action.v]: adjV, [action.w]: adjW},
+        reset: (state.reset + 1) % 2
       };
     case 'update':
       return {...state, adjList: action.adj, nodes: state.nodes.map((node, i) => ({...node, color: action.nodes[i].color}))}
@@ -87,14 +87,9 @@ const reducer = (state, action) => {
           [node, l.map(edge => ({...edge, color:'black'}))])
           ),
         nodes: state.nodes.map((node) => ({...node, color: 'white'})),
-        reset: (state.reset + 1) % 2,
-        timer: null,
-        visCompleted: false}
+        reset: (state.reset + 1) % 2}
     case 'triggerStartVis':
-      return {...state, 
-        reset: action.trigger ? (state.reset + 1) % 2 : state.reset, //dummy field triggers fresh step generator object
-        timer: action.timer, // Timer is ao used for play/pause text toggle
-        visCompleted: action.visCompleted}
+      return {...state, reset: (state.reset + 1) % 2} // Dummy field triggers fresh step generator object
     default:
       return state
   }
@@ -107,48 +102,48 @@ export default function GraphVisualisation() {
   const [networkGraph, dispatchNetworkGraph] = useReducer(reducer, initialState);
   const [steps, setSteps] = useState()
   const [alogrithm, setAlgorithm] = useState(ALG.BFS)
-  const timerIdRef = useRef();
+  const [isPlaying, setIsPlaying] = useState({playing: false, finished: false, delay:203})
 
-  // Sorts one step
-  const runVisStep = () => {
-    let nextStep = steps.next()
-    if (nextStep.done === true) {
-      clearInterval(timerIdRef.current)
-      dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: true, trigger: true})
-    } else {
-      dispatchNetworkGraph({type: 'update', adj:nextStep.value.adj, nodes:nextStep.value.nodes})
-    }
-  }
+  usePlayPause(() => {
+      let nextStep = steps.next()
+      if (nextStep.done === true) {
+        setIsPlaying({playing: false, finished: true})
+        dispatchNetworkGraph({type: 'triggerStartVis'}) // Not sure if needed
+      } else {
+        dispatchNetworkGraph({type: 'update', adj:nextStep.value.adj, nodes:nextStep.value.nodes})
+      }
+    }, isPlaying.playing ? isPlaying.delay : null
+  )
 
-  // due to strict mode setArray runs twice with the same end result cus no modifications, however
-  // two timers get created and we need to have EXACTLY 1 (otherwise pause will not work).
-  // Currently uses a useRef to store timer id which we clear on second call, but this seems a bit hacky
-  // so this might break later on!
-  // We can also use a global variable instead of useRef I think...
   const runVis = (ms) => {
-    clearInterval(timerIdRef.current)
-    const intervalTimer = setInterval(() => runVisStep(), ms)
-    timerIdRef.current = intervalTimer;
-    dispatchNetworkGraph({type:'triggerStartVis', timer: intervalTimer, visCompleted: false, trigger: true})
+    setIsPlaying((prev) => {return {...prev, playing:true, delay: ms}})
   }
 
-  // Clear timer and update the state
   const pauseVisualisation = () => {
-    clearInterval(timerIdRef.current)
-    dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: false})
+    setIsPlaying((prev) => {return {...prev, playing:false}})
+  }
+
+  const setNewGraph = (connectness, w, h) => {
+    setIsPlaying((prev) => {return {...prev, playing:false, finished: false}})
+
+    const networkGraph = GraphFactory("diamond", false, connectness, w, h)
+    dispatchNetworkGraph({type: 'setNewGraph', adj:networkGraph[1], nodes:networkGraph[0]})
+    dispatchNetworkGraph({type: 'triggerStartVis'})
+  }
+
+  const resetNetwork = () => {
+    setIsPlaying((prev) => {return {...prev, playing:false, finished: false}})
+    dispatchNetworkGraph({type: 'reset'})
   }
 
   const switchAlgorithm = (event) => {
-    clearInterval(timerIdRef.current)
-    dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true}) 
-
+    setIsPlaying((prev) => {return {...prev, playing:false, finished: false}}) 
     setAlgorithm(event.target.value);
-    console.log("Switched to", event.target.value)
+    console.log(`Switched to: ${event.target.value}`)
   }
 
   // Set new moves
-  const algorithmSelector = (alg, adjMatrix, nodes) => {
-    
+  const algorithmSelector = (alg, adjList, nodes) => {
     setSteps((prev) => {
       let traverser;
       if (alg === ALG.BFS) {
@@ -156,12 +151,12 @@ export default function GraphVisualisation() {
       } else if (alg === ALG.DFS) {
         traverser = new DFS();
       }
-      return traverser.stepGenerator(networkGraph.start, networkGraph.end, adjMatrix, nodes)
+      return traverser.stepGenerator(networkGraph.start, networkGraph.end, adjList, nodes)
     }); 
   }
 
   useEffect(() => { 
-    if (networkGraph.visCompleted === false && networkGraph.timer === null) {
+    if (isPlaying.finished === false && isPlaying.playing === false) {
       algorithmSelector(alogrithm, networkGraph.adjList, networkGraph.nodes);
     }
   }, [alogrithm, networkGraph.reset])
@@ -170,43 +165,22 @@ export default function GraphVisualisation() {
     dispatchNetworkGraph({type: 'reset'})
   }, [alogrithm])
 
-  const setNewGraph = (connectness, w, h) => {
-    clearInterval(timerIdRef.current)
-    const networkGraph = GraphFactory("diamond", false, connectness, w, h)
-
-    dispatchNetworkGraph({type: 'setNewGraph', adj:networkGraph[1], nodes:networkGraph[0]})
-    dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true})
-  }
-
-  // When the nodepositions are reset, no new moves are generated. But the old moves are still
-  // correct and we set the step to 0 so that it start correctly again
-  const resetNetwork = () => {
-    clearInterval(timerIdRef.current)
-    dispatchNetworkGraph({type: 'reset'})
-}
-
   return (
     <div style={{display: "flex"}}>
       
       <div ref={demoRef} style={visStyle}>
         <GraphArea width={width} height={height} network={networkGraph} 
-        updateNodes={(id, pos) => dispatchNetworkGraph({type:'updateNodes', pos: pos, id:id, w:width, h:height})} 
-        addNode={(pos) => {
-          dispatchNetworkGraph({type: 'addVertex', v:5, pos: pos, w:width, h:height})
-          dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true}) 
-        }}
-        addEdge={(v, w) => {
-          dispatchNetworkGraph({type: 'addEdge', v:v, w:w})
-          dispatchNetworkGraph({type: 'triggerStartVis', timer: null, visCompleted: false, trigger: true}) 
-          }}
-        setStart={(start) => dispatchNetworkGraph({type: 'setStart', start:start})}
-        setEnd={(end) => dispatchNetworkGraph({type: 'setEnd', end:end})}/>
+        updateNodes={ (id, pos) => dispatchNetworkGraph({type:'updateNodes', pos: pos, id:id, w:width, h:height}) } 
+        addNode={ (pos) => {dispatchNetworkGraph({type: 'addVertex', v:5, pos: pos, w:width, h:height})} }
+        addEdge={ (v, w) => {dispatchNetworkGraph({type: 'addEdge', v:v, w:w})} }
+        setStart={ (start) => dispatchNetworkGraph({type: 'setStart', start:start}) }
+        setEnd={ (end) => dispatchNetworkGraph({type: 'setEnd', end:end}) }/>
       </div>
       
       <div style={sideMenuStyle}>
         <SideMenuGeneric>
           <GraphGenButtons generate={setNewGraph} reset={resetNetwork}/>
-          <PlayPause timer={networkGraph.timer} runVis={runVis} pause={pauseVisualisation}/>
+          <PlayPause isPlaying={isPlaying.playing} runVis={runVis} pause={pauseVisualisation}/>
           <AlgSelection algs={ALG} alg={alogrithm} switchAlg={switchAlgorithm}/>
         </SideMenuGeneric>
       </div>
