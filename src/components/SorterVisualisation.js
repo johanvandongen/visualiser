@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { randomValue } from "../utils/helpers"
 import { InsertionSort } from "../algorithms/sortingAlgs/InsertionSort";
 import { BubbleSort } from "../algorithms/sortingAlgs/BubbleSort";
+import { CocktailSort } from "../algorithms/sortingAlgs/CocktailSort";
 import { InPlaceMergeSort } from "../algorithms/sortingAlgs/InPlaceMergeSort";
 import { visStyle, sideMenuStyle } from "../App";
 import {SideMenuGeneric, PlayPause, AlgSelection, SorterGenButtons} from "../index.js"
@@ -12,7 +13,8 @@ import { usePlayPause } from "../hooks/usePlayPause";
 export const ALG = {
     INSERTION: 'insertion',
     BUBBLE: 'bubble',
-    MERGE: 'merge'
+    MERGE: 'merge',
+    COCKTAIL: 'cocktail'
 }
 
 export default function SorterVisualisation() {
@@ -94,6 +96,8 @@ export default function SorterVisualisation() {
                 sorter = new InsertionSort();
             } else if (alogrithm === ALG.BUBBLE) {
                 sorter = new BubbleSort();
+            } else if (alogrithm === ALG.COCKTAIL) {
+                sorter = new CocktailSort();
             } else {
                 sorter = new InPlaceMergeSort();
             }
