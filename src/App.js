@@ -23,7 +23,7 @@ export const visStyle = {
 
 function App() {
 
-  const [type, setType] = useState(1);
+  const [type, setType] = useState("Sorter");
 
   // Styles ---
   const topMenuStyle = {
@@ -35,13 +35,11 @@ function App() {
   }
 
   const types = {
-    0: {name: "Sorter", comp: <SorterVisualisation/>},
-    1: {name: "Network Graph", comp: <GraphVisualisation/>},
-    2: {name: "Hello world", comp: <HelloWorld/>}
+    "Sorter" : <SorterVisualisation/>,
+    "Network Graph" : <GraphVisualisation/>
   }
 
   const changeType = (event) => {
-    console.log("changed to: ", event.target.value)
     setType(event.target.value)
   }
 
@@ -51,7 +49,7 @@ function App() {
     <div style={topMenuStyle}>
       <TopMenu changeType={changeType} types={types} currentType={type}/>
     </div>
-    {types[type].comp}
+    {types[type]}
     </>
   )
 }

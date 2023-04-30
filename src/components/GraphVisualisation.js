@@ -108,7 +108,7 @@ export default function GraphVisualisation() {
       let nextStep = steps.next()
       if (nextStep.done === true) {
         setIsPlaying({playing: false, finished: true})
-        dispatchNetworkGraph({type: 'triggerStartVis'})
+        dispatchNetworkGraph({type: 'triggerStartVis'}) // Not sure if needed
       } else {
         dispatchNetworkGraph({type: 'update', adj:nextStep.value.adj, nodes:nextStep.value.nodes})
       }

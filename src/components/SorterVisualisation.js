@@ -17,7 +17,7 @@ export const ALG = {
 
 export default function SorterVisualisation() {
     const [array, setArray] = useState({initValues: [], values: [], leftElement:-1, rightElement:-1, reset: 0})
-    const [alogrithm, setAlgorithm] = useState(ALG.BUBBLE)
+    const [alogrithm, setAlgorithm] = useState(ALG.MERGE)
     const [steps, setSteps] = useState()
     const [isPlaying, setIsPlaying] = useState({playing: false, finished: false, delay:203})
 
