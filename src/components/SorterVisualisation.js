@@ -6,6 +6,7 @@ import { InsertionSort } from "../algorithms/sortingAlgs/InsertionSort";
 import { BubbleSort } from "../algorithms/sortingAlgs/BubbleSort";
 import { CocktailSort } from "../algorithms/sortingAlgs/CocktailSort";
 import { InPlaceMergeSort } from "../algorithms/sortingAlgs/InPlaceMergeSort";
+import { QuickSort } from "../algorithms/sortingAlgs/QuickSort";
 import { visStyle, sideMenuStyle } from "../App";
 import {SideMenuGeneric, PlayPause, AlgSelection, SorterGenButtons} from "../index.js"
 import { usePlayPause } from "../hooks/usePlayPause";
@@ -14,7 +15,8 @@ export const ALG = {
     INSERTION: 'insertion',
     BUBBLE: 'bubble',
     MERGE: 'merge',
-    COCKTAIL: 'cocktail'
+    COCKTAIL: 'cocktail',
+    QUICKSORT: 'quick sort'
 }
 
 export default function SorterVisualisation() {
@@ -98,6 +100,8 @@ export default function SorterVisualisation() {
                 sorter = new BubbleSort();
             } else if (alogrithm === ALG.COCKTAIL) {
                 sorter = new CocktailSort();
+            } else if (alogrithm === ALG.QUICKSORT) {
+                sorter = new QuickSort()
             } else {
                 sorter = new InPlaceMergeSort();
             }
